@@ -6,10 +6,10 @@
     <title>Zenith Focus // Deep Work Suite</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;600&family=JetBrains+Mono:wght@200&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            /* Varsayılan Gece Modu Değişkenleri */
             --bg: #030305;
             --accent: #a5b4fc; 
             --accent-glow: rgba(165, 180, 252, 0.25);
@@ -17,9 +17,12 @@
             --border: rgba(255, 255, 255, 0.07);
             --text-main: #ffffff;
             --text-dim: #64748b;
+            --progress-bg: rgba(255, 255, 255, 0.1);
+            --spotify: #1DB954;
+            --youtube: #FF0000;
+            --apple: #FA243C;
         }
 
-        /* Gündüz Modu Renk Paleti */
         [data-theme="light"] {
             --bg: #f8fafc;
             --accent: #4f46e5;
@@ -28,6 +31,7 @@
             --border: rgba(0, 0, 0, 0.05);
             --text-main: #1e293b;
             --text-dim: #64748b;
+            --progress-bg: rgba(0, 0, 0, 0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; transition: background 0.4s ease, color 0.4s ease; }
@@ -43,15 +47,20 @@
             overflow: hidden;
         }
 
-        /* Arka Plan Hareketli Gradient */
         .bg-gradient {
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at 20% 20%, var(--accent-glow) 0%, transparent 40%);
+            background: radial-gradient(circle at 20% 20%, var(--accent-glow) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 80%, var(--accent-glow) 0%, transparent 40%);
             z-index: 1;
+            animation: gradientMove 15s ease-in-out infinite;
         }
 
-        /* Tema Değiştirme Butonu (Sağ Üst) */
+        @keyframes gradientMove {
+            0%, 100% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.1) translate(-5%, -5%); }
+        }
+
         .theme-toggle {
             position: absolute;
             top: 30px;
@@ -66,6 +75,17 @@
             font-size: 12px;
             font-weight: 600;
             backdrop-filter: blur(10px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px var(--accent-glow);
+        }
+
+        .theme-toggle:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
         }
 
         .zenith-app {
@@ -91,17 +111,86 @@
             margin-bottom: 30px;
         }
 
+        .progress-ring-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .timer-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
         #timer-display {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 88px;
+            font-size: 72px;
             font-weight: 200;
             letter-spacing: -4px;
             line-height: 1;
-            margin: 20px 0;
             transition: transform 0.3s ease;
         }
 
-        .active-timer { transform: scale(1.05); color: var(--accent); }
+        .active-timer { 
+            transform: scale(1.05); 
+            color: var(--accent); 
+        }
+
+        .timer-mode {
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-dim);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .mode-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .mode-btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
 
         .control-group {
             display: flex;
@@ -127,6 +216,16 @@
             font-size: 15px;
         }
 
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn-main:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
         [data-theme="light"] .btn-main { color: #fff; }
 
         .btn-icon {
@@ -134,6 +233,67 @@
             background: rgba(128, 128, 128, 0.05);
             border: 1px solid var(--border);
             color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        .btn-icon:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-icon:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* Müzik Kaynağı Seçici */
+        .source-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .source-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-dim);
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .source-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .source-btn.active {
+            border-color: transparent;
+            color: white;
+        }
+
+        .source-btn.spotify.active {
+            background: var(--spotify);
+        }
+
+        .source-btn.youtube.active {
+            background: var(--youtube);
+        }
+
+        .source-btn.apple.active {
+            background: var(--apple);
+        }
+
+        .source-btn.local.active {
+            background: var(--accent);
         }
 
         .mixer-panel {
@@ -144,13 +304,24 @@
             gap: 20px;
         }
 
+        .mixer-panel.hidden {
+            display: none;
+        }
+
         .audio-track {
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        .track-label { font-size: 11px; font-weight: 600; color: var(--text-dim); letter-spacing: 1px; }
+        .track-label { 
+            font-size: 11px; 
+            font-weight: 600; 
+            color: var(--text-dim); 
+            letter-spacing: 1px; 
+            min-width: 70px;
+            text-align: left;
+        }
 
         input[type="range"] {
             -webkit-appearance: none;
@@ -158,64 +329,315 @@
             height: 3px;
             background: var(--border);
             border-radius: 10px;
+            cursor: pointer;
+        }
+
+        input[type="range"]:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 4px;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 14px; height: 14px;
+            width: 14px; 
+            height: 14px;
             background: var(--accent);
             border-radius: 50%;
             cursor: pointer;
+            transition: transform 0.2s ease;
         }
 
-        .footer { margin-top: 30px; font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 14px; 
+            height: 14px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* YouTube Player */
+        .youtube-container {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .youtube-container.active {
+            display: block;
+        }
+
+        .youtube-container iframe {
+            width: 100%;
+            height: 150px;
+            border-radius: 15px;
+            border: none;
+        }
+
+        /* External Player Links */
+        .external-player {
+            display: none;
+            padding: 15px;
+            border-radius: 15px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .external-player.active {
+            display: block;
+        }
+
+        .external-player a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            transition: transform 0.3s ease;
+        }
+
+        .external-player a:hover {
+            transform: scale(1.05);
+        }
+
+        .spotify-link { background: var(--spotify); }
+        .apple-link { background: var(--apple); }
+
+        .notification-prompt {
+            display: none;
+            margin-top: 15px;
+            font-size: 10px;
+        }
+
+        .notification-prompt.show {
+            display: block;
+        }
+
+        .notification-btn {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .footer { 
+            margin-top: 30px; 
+            font-size: 10px; 
+            color: var(--text-dim); 
+            letter-spacing: 1px; 
+        }
+
+        .footer span {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .zenith-app {
+                padding: 40px 25px;
+                border-radius: 30px;
+            }
+
+            #timer-display {
+                font-size: 56px;
+            }
+
+            .progress-ring-container {
+                width: 220px;
+                height: 220px;
+            }
+
+            .mode-btn {
+                padding: 6px 12px;
+                font-size: 10px;
+            }
+
+            .source-btn {
+                padding: 6px 10px;
+                font-size: 10px;
+            }
+        }
+
+        @media (prefers-contrast: high) {
+            :root {
+                --border: rgba(255, 255, 255, 0.3);
+            }
+            [data-theme="light"] {
+                --border: rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .bg-gradient {
+                animation: none;
+            }
+        }
     </style>
 </head>
-<body data-theme="dark">
+<body data-theme="dark" role="application" aria-label="Zenith Focus - Derin Çalışma Uygulaması">
 
-    <div class="bg-gradient"></div>
+    <div class="bg-gradient" aria-hidden="true"></div>
 
-    <button class="theme-toggle" id="theme-btn">🌙 GECE MODU</button>
+    <button class="theme-toggle" id="theme-btn" aria-label="Tema değiştir">
+        🌙 GECE MODU
+    </button>
 
     <main class="zenith-app">
         <div class="brand-name">Zenith Focus</div>
 
-        <div class="timer-wrap">
-            <h1 id="timer-display">25:00</h1>
+        <div class="mode-selector" role="group" aria-label="Timer modu seç">
+            <button class="mode-btn active" data-mode="focus" data-time="25" aria-pressed="true">ODAK (25 dk)</button>
+            <button class="mode-btn" data-mode="short" data-time="5" aria-pressed="false">KISA MOLA (5 dk)</button>
+            <button class="mode-btn" data-mode="long" data-time="15" aria-pressed="false">UZUN MOLA (15 dk)</button>
+        </div>
+
+        <div class="progress-ring-container">
+            <svg class="progress-ring" width="280" height="280" aria-hidden="true">
+                <circle class="progress-ring__bg" stroke="var(--progress-bg)" stroke-width="4" fill="transparent" r="130" cx="140" cy="140"/>
+                <circle class="progress-ring__circle" stroke="var(--accent)" stroke-width="4" fill="transparent" r="130" cx="140" cy="140" stroke-linecap="round"/>
+            </svg>
+            <div class="timer-wrapper">
+                <div class="timer-mode" id="timer-mode">ODAK</div>
+                <h1 id="timer-display" role="timer" aria-live="polite" aria-atomic="true">25:00</h1>
+            </div>
         </div>
 
         <div class="control-group">
-            <button class="btn btn-main" id="start-btn">Start Focus</button>
-            <button class="btn btn-icon" id="reset-btn">Reset</button>
+            <button class="btn btn-main" id="start-btn" aria-label="Timer'ı başlat">Start Focus</button>
+            <button class="btn btn-icon" id="reset-btn" aria-label="Timer'ı sıfırla">↺</button>
         </div>
 
-        <div class="mixer-panel">
+        <!-- Müzik Kaynağı Seçici -->
+        <div class="source-selector" role="group" aria-label="Müzik kaynağı seç">
+            <button class="source-btn local active" data-source="local" aria-pressed="true">
+                <i class="fas fa-music"></i> Yerel
+            </button>
+            <button class="source-btn youtube" data-source="youtube" aria-pressed="false">
+                <i class="fab fa-youtube"></i> YouTube
+            </button>
+            <button class="source-btn spotify" data-source="spotify" aria-pressed="false">
+                <i class="fab fa-spotify"></i> Spotify
+            </button>
+            <button class="source-btn apple" data-source="apple" aria-pressed="false">
+                <i class="fab fa-apple"></i> Apple
+            </button>
+        </div>
+
+        <!-- YouTube Player -->
+        <div class="youtube-container" id="youtube-container">
+            <div id="youtube-player"></div>
+        </div>
+
+        <!-- External Player Links -->
+        <div class="external-player" id="spotify-player">
+            <a href="https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd" target="_blank" class="spotify-link">
+                <i class="fab fa-spotify"></i> Spotify'da Odak playlist'i aç
+            </a>
+        </div>
+
+        <div class="external-player" id="apple-player">
+            <a href="https://music.apple.com/tr/playlist/focus/pl.4a4f2a3a8e2a4b3" target="_blank" class="apple-link">
+                <i class="fab fa-apple"></i> Apple Music'te Focus playlist'i aç
+            </a>
+        </div>
+
+        <!-- Yerel Ses Mixer -->
+        <div class="mixer-panel" id="local-mixer" aria-label="Ses mixer'ı">
             <div class="audio-track">
-                <span class="track-label">RAINFALL</span>
-                <input type="range" class="vol-slider" data-src="rain" min="0" max="1" step="0.01" value="0">
+                <span class="track-label">🌧️ RAIN</span>
+                <input type="range" class="vol-slider" data-src="rain" min="0" max="1" step="0.01" value="0" aria-label="Yağmur sesi hacmi">
             </div>
             <div class="audio-track">
-                <span class="track-label">FOREST</span>
-                <input type="range" class="vol-slider" data-src="forest" min="0" max="1" step="0.01" value="0">
+                <span class="track-label">🌲 FOREST</span>
+                <input type="range" class="vol-slider" data-src="forest" min="0" max="1" step="0.01" value="0" aria-label="Orman sesi hacmi">
             </div>
+            <div class="audio-track">
+                <span class="track-label">🔥 FIRE</span>
+                <input type="range" class="vol-slider" data-src="fire" min="0" max="1" step="0.01" value="0" aria-label="Ateş sesi hacmi">
+            </div>
+            <div class="audio-track">
+                <span class="track-label">☕ CAFE</span>
+                <input type="range" class="vol-slider" data-src="cafe" min="0" max="1" step="0.01" value="0" aria-label="Kafe sesi hacmi">
+            </div>
+        </div>
+
+        <div class="notification-prompt" id="notification-prompt">
+            <button class="notification-btn" id="notification-btn">🔔 Bildirimlere İzin Ver</button>
         </div>
 
         <div class="footer">
-            SESSIONS COMPLETED: <span id="streak">0</span>
+            TAMAMLANAN OTURUMLAR: <span id="streak">0</span>
         </div>
     </main>
 
-    <audio id="audio-rain" loop src="https://assets.mixkit.co/sfx/preview/mixkit-light-rain-loop-2393.mp3"></audio>
-    <audio id="audio-forest" loop src="https://assets.mixkit.co/sfx/preview/mixkit-forest-birds-ambience-1210.mp3"></audio>
+    <!-- Yerel Ses Dosyaları -->
+    <audio id="audio-rain" loop preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-light-rain-loop-2393.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-forest" loop preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-forest-birds-ambience-1210.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-fire" loop preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-campfire-crackling-1288.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-cafe" loop preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-restaurant-crowd-talking-444.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-complete" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
         class ZenithApp {
             constructor() {
-                this.timeLeft = 1500;
+                this.modes = {
+                    focus: { time: 25 * 60, label: 'ODAK' },
+                    short: { time: 5 * 60, label: 'KISA MOLA' },
+                    long: { time: 15 * 60, label: 'UZUN MOLA' }
+                };
+                
+                this.currentMode = 'focus';
+                this.timeLeft = this.modes[this.currentMode].time;
+                this.totalTime = this.timeLeft;
                 this.isRunning = false;
                 this.interval = null;
                 this.theme = 'dark';
-
+                this.sessions = this.loadSessions();
+                this.audioLoaded = {};
+                this.currentSource = 'local';
+                this.youtubePlayer = null;
+                
+                this.progressRing = document.querySelector('.progress-ring__circle');
+                this.progressRing.style.strokeDasharray = `${2 * Math.PI * 130}`;
+                this.progressRing.style.strokeDashoffset = 0;
+                
                 this.init();
             }
 
@@ -223,26 +645,151 @@
                 this.dom = {
                     body: document.body,
                     timer: document.getElementById('timer-display'),
+                    timerMode: document.getElementById('timer-mode'),
                     startBtn: document.getElementById('start-btn'),
                     resetBtn: document.getElementById('reset-btn'),
                     themeBtn: document.getElementById('theme-btn'),
-                    sliders: document.querySelectorAll('.vol-slider')
+                    sliders: document.querySelectorAll('.vol-slider'),
+                    modeBtns: document.querySelectorAll('.mode-btn'),
+                    sourceBtns: document.querySelectorAll('.source-btn'),
+                    streak: document.getElementById('streak'),
+                    notificationPrompt: document.getElementById('notification-prompt'),
+                    notificationBtn: document.getElementById('notification-btn'),
+                    localMixer: document.getElementById('local-mixer'),
+                    youtubeContainer: document.getElementById('youtube-container'),
+                    spotifyPlayer: document.getElementById('spotify-player'),
+                    applePlayer: document.getElementById('apple-player')
                 };
 
                 this.bindEvents();
                 this.loadTheme();
+                this.loadAudioVolumes();
+                this.updateStreak();
+                this.checkNotificationPermission();
+                this.preloadAudio();
             }
 
             bindEvents() {
                 this.dom.startBtn.onclick = () => this.toggleTimer();
                 this.dom.resetBtn.onclick = () => this.resetTimer();
                 this.dom.themeBtn.onclick = () => this.toggleTheme();
+                this.dom.notificationBtn.onclick = () => this.requestNotification();
+                
+                this.dom.modeBtns.forEach(btn => {
+                    btn.onclick = () => this.setMode(btn.dataset.mode);
+                });
+                
+                this.dom.sourceBtns.forEach(btn => {
+                    btn.onclick = () => this.setSource(btn.dataset.source);
+                });
                 
                 this.dom.sliders.forEach(s => {
                     s.oninput = (e) => this.handleAudio(e);
+                    s.onchange = () => this.saveAudioVolumes();
                 });
+                
+                document.onkeydown = (e) => {
+                    if (e.code === 'Space' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+                        e.preventDefault();
+                        this.toggleTimer();
+                    }
+                    if (e.code === 'Escape') {
+                        this.resetTimer();
+                    }
+                };
+            }
 
-                document.onkeydown = (e) => { if(e.code === 'Space') this.toggleTimer(); };
+            setMode(mode) {
+                if (this.isRunning) {
+                    this.toggleTimer();
+                }
+                
+                this.currentMode = mode;
+                this.timeLeft = this.modes[mode].time;
+                this.totalTime = this.timeLeft;
+                this.dom.timerMode.innerText = this.modes[mode].label;
+                
+                this.dom.modeBtns.forEach(btn => {
+                    const isActive = btn.dataset.mode === mode;
+                    btn.classList.toggle('active', isActive);
+                    btn.setAttribute('aria-pressed', isActive);
+                });
+                
+                this.dom.startBtn.innerText = mode === 'focus' ? 'Start Focus' : 'Start Break';
+                this.updateDisplay();
+                this.updateProgress();
+            }
+
+            // Müzik kaynağı değiştirme
+            setSource(source) {
+                this.currentSource = source;
+                
+                // Tüm butonları güncelle
+                this.dom.sourceBtns.forEach(btn => {
+                    const isActive = btn.dataset.source === source;
+                    btn.classList.toggle('active', isActive);
+                    btn.setAttribute('aria-pressed', isActive);
+                });
+                
+                // Panel gösterimi
+                this.dom.localMixer.classList.toggle('active', source === 'local');
+                this.dom.localMixer.classList.toggle('hidden', source !== 'local');
+                this.dom.youtubeContainer.classList.toggle('active', source === 'youtube');
+                this.dom.spotifyPlayer.classList.toggle('active', source === 'spotify');
+                this.dom.applePlayer.classList.toggle('active', source === 'apple');
+                
+                // YouTube player başlat
+                if (source === 'youtube') {
+                    this.initYouTube();
+                }
+                
+                // Diğer sesleri durdur
+                this.stopAllAudio();
+                
+                localStorage.setItem('zenith_source', source);
+            }
+
+            // YouTube Player başlat
+            initYouTube() {
+                if (this.youtubePlayer) return;
+                
+                // YouTube API yüklendiyse player oluştur
+                if (typeof YT !== 'undefined' && YT.Player) {
+                    this.youtubePlayer = new YT.Player('youtube-player', {
+                        height: '150',
+                        width: '100%',
+                        playerVars: {
+                            'autoplay': 0,
+                            'controls': 1,
+                            'loop': 1,
+                            'playlist': 'jfKfPfyJRdk', // Lofi girl stream
+                            'modestbranding': 1,
+                            'rel': 0
+                        },
+                        events: {
+                            'onReady': (event) => {
+                                event.target.setVolume(50);
+                            }
+                        }
+                    });
+                }
+            }
+
+            // Tüm sesleri durdur
+            stopAllAudio() {
+                // Yerel sesleri durdur
+                ['rain', 'forest', 'fire', 'cafe'].forEach(id => {
+                    const audio = document.getElementById(`audio-${id}`);
+                    if (audio) {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }
+                });
+                
+                // YouTube'u durdur
+                if (this.youtubePlayer && this.youtubePlayer.stopVideo) {
+                    this.youtubePlayer.stopVideo();
+                }
             }
 
             toggleTheme() {
@@ -259,58 +806,313 @@
                     this.dom.body.setAttribute('data-theme', this.theme);
                     this.dom.themeBtn.innerText = this.theme === 'dark' ? '🌙 GECE MODU' : '☀️ GÜNDÜZ MODU';
                 }
+                
+                if (!saved && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    this.toggleTheme();
+                }
+                
+                // Kaydedilmiş müzik kaynağını yükle
+                const savedSource = localStorage.getItem('zenith_source');
+                if (savedSource) {
+                    this.setSource(savedSource);
+                }
             }
 
             toggleTimer() {
                 this.isRunning = !this.isRunning;
-                this.dom.startBtn.innerText = this.isRunning ? 'Pause' : 'Start Focus';
+                this.dom.startBtn.innerText = this.isRunning 
+                    ? '⏸ Pause' 
+                    : (this.currentMode === 'focus' ? 'Start Focus' : 'Start Break');
                 this.dom.timer.classList.toggle('active-timer', this.isRunning);
 
                 if (this.isRunning) {
+                    // Müzik kaynağına göre otomatik çal
+                    this.playMusic();
+                    
                     this.interval = setInterval(() => {
                         if (this.timeLeft > 0) {
                             this.timeLeft--;
                             this.updateDisplay();
+                            this.updateProgress();
+                            this.updateTitle();
                         } else {
                             this.finish();
                         }
                     }, 1000);
                 } else {
                     clearInterval(this.interval);
+                    this.pauseMusic();
                 }
             }
 
             resetTimer() {
                 clearInterval(this.interval);
                 this.isRunning = false;
-                this.timeLeft = 1500;
-                this.dom.startBtn.innerText = 'Start Focus';
+                this.timeLeft = this.modes[this.currentMode].time;
+                this.totalTime = this.timeLeft;
+                this.dom.startBtn.innerText = this.currentMode === 'focus' ? 'Start Focus' : 'Start Break';
                 this.dom.timer.classList.remove('active-timer');
                 this.updateDisplay();
+                this.updateProgress();
+                document.title = 'Zenith Focus // Deep Work Suite';
+                this.pauseMusic();
+            }
+
+            // Timer başlayınca müzik çal
+            playMusic() {
+                if (this.currentSource === 'youtube' && this.youtubePlayer && this.youtubePlayer.playVideo) {
+                    this.youtubePlayer.playVideo();
+                }
+            }
+
+            // Timer durunca müzik durdur
+            pauseMusic() {
+                if (this.currentSource === 'youtube' && this.youtubePlayer && this.youtubePlayer.pauseVideo) {
+                    this.youtubePlayer.pauseVideo();
+                }
             }
 
             updateDisplay() {
                 const m = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
                 const s = (this.timeLeft % 60).toString().padStart(2, '0');
                 this.dom.timer.innerText = `${m}:${s}`;
-                document.title = `${m}:${s} // Zenith`;
+            }
+
+            updateTitle() {
+                const m = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
+                const s = (this.timeLeft % 60).toString().padStart(2, '0');
+                const mode = this.currentMode === 'focus' ? 'Focus' : 'Break';
+                document.title = `${m}:${s} // ${mode} - Zenith`;
+            }
+
+            updateProgress() {
+                const progress = (this.totalTime - this.timeLeft) / this.totalTime;
+                const offset = (2 * Math.PI * 130) * progress;
+                this.progressRing.style.strokeDashoffset = offset;
+            }
+
+            finish() {
+                clearInterval(this.interval);
+                this.isRunning = false;
+                
+                this.playCompleteSound();
+                
+                if (this.currentMode === 'focus') {
+                    this.sessions++;
+                    this.saveSessions();
+                    this.updateStreak();
+                }
+                
+                this.sendNotification();
+                
+                this.dom.timer.classList.add('active-timer');
+                setTimeout(() => {
+                    this.dom.timer.classList.remove('active-timer');
+                }, 2000);
+                
+                const message = this.currentMode === 'focus' 
+                    ? "🎉 Odaklanma seansı bitti! Harikasın!" 
+                    : "☕ Mola bitti! Hazır mısın?";
+                
+                this.showFinishModal(message);
+                this.pauseMusic();
+                this.resetTimer();
+            }
+
+            showFinishModal(message) {
+                const existing = document.querySelector('.finish-modal');
+                if (existing) existing.remove();
+                
+                const modal = document.createElement('div');
+                modal.className = 'finish-modal';
+                modal.innerHTML = `
+                    <style>
+                        .finish-modal {
+                            position: fixed;
+                            inset: 0;
+                            background: rgba(0,0,0,0.8);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            z-index: 100;
+                            animation: fadeIn 0.3s ease;
+                        }
+                        @keyframes fadeIn {
+                            from { opacity: 0; }
+                            to { opacity: 1; }
+                        }
+                        .finish-modal-content {
+                            background: var(--card);
+                            backdrop-filter: blur(40px);
+                            padding: 40px;
+                            border-radius: 30px;
+                            text-align: center;
+                            border: 1px solid var(--border);
+                            max-width: 300px;
+                        }
+                        .finish-modal h2 {
+                            color: var(--accent);
+                            margin-bottom: 15px;
+                            font-weight: 300;
+                        }
+                        .finish-modal p {
+                            color: var(--text-dim);
+                            margin-bottom: 25px;
+                            font-size: 14px;
+                        }
+                        .finish-modal button {
+                            background: var(--accent);
+                            color: white;
+                            border: none;
+                            padding: 12px 30px;
+                            border-radius: 15px;
+                            font-size: 14px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            font-family: inherit;
+                        }
+                    </style>
+                    <div class="finish-modal-content">
+                        <h2>${this.currentMode === 'focus' ? '🎯' : '☕'}</h2>
+                        <p>${message}</p>
+                        <p style="margin-top: 10px; color: var(--accent); font-weight: 600;">Toplam Oturum: ${this.sessions}</p>
+                        <button onclick="this.closest('.finish-modal').remove()">Tamam</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                const escHandler = (e) => {
+                    if (e.code === 'Escape') {
+                        modal.remove();
+                        document.removeEventListener('keydown', escHandler);
+                    }
+                };
+                document.addEventListener('keydown', escHandler);
             }
 
             handleAudio(e) {
                 const type = e.target.dataset.src;
                 const audio = document.getElementById(`audio-${type}`);
-                audio.volume = e.target.value;
-                if (audio.volume > 0 && audio.paused) audio.play();
-                else if (audio.volume == 0) audio.pause();
+                const value = parseFloat(e.target.value);
+                
+                if (audio) {
+                    audio.volume = value;
+                    if (value > 0 && audio.paused) {
+                        audio.play().catch(err => console.log('Audio play error:', err));
+                    } else if (value === 0) {
+                        audio.pause();
+                    }
+                }
             }
 
-            finish() {
-                this.resetTimer();
-                alert("Odaklanma seansı bitti! Harikasın.");
+            async preloadAudio() {
+                const audioIds = ['rain', 'forest', 'fire', 'cafe', 'complete'];
+                
+                for (const id of audioIds) {
+                    const audio = document.getElementById(`audio-${id}`);
+                    if (audio) {
+                        audio.load();
+                        audio.addEventListener('canplaythrough', () => {
+                            this.audioLoaded[id] = true;
+                        });
+                        audio.addEventListener('error', (e) => {
+                            console.log(`Audio ${id} yüklenemedi:`, e);
+                            this.audioLoaded[id] = false;
+                        });
+                    }
+                }
+            }
+
+            playCompleteSound() {
+                const audio = document.getElementById('audio-complete');
+                if (audio && this.audioLoaded.complete !== false) {
+                    audio.volume = 0.5;
+                    audio.play().catch(err => console.log('Complete sound error:', err));
+                }
+            }
+
+            saveAudioVolumes() {
+                const volumes = {};
+                this.dom.sliders.forEach(s => {
+                    volumes[s.dataset.src] = s.value;
+                });
+                localStorage.setItem('zenith_volumes', JSON.stringify(volumes));
+            }
+
+            loadAudioVolumes() {
+                const saved = localStorage.getItem('zenith_volumes');
+                if (saved) {
+                    const volumes = JSON.parse(saved);
+                    this.dom.sliders.forEach(s => {
+                        if (volumes[s.dataset.src] !== undefined) {
+                            s.value = volumes[s.dataset.src];
+                            const audio = document.getElementById(`audio-${s.dataset.src}`);
+                            if (audio && volumes[s.dataset.src] > 0) {
+                                audio.volume = volumes[s.dataset.src];
+                                audio.play().catch(() => {});
+                            }
+                        }
+                    });
+                }
+            }
+
+            saveSessions() {
+                localStorage.setItem('zenith_sessions', this.sessions.toString());
+            }
+
+            loadSessions() {
+                const saved = localStorage.getItem('zenith_sessions');
+                return saved ? parseInt(saved, 10) : 0;
+            }
+
+            updateStreak() {
+                this.dom.streak.innerText = this.sessions;
+            }
+
+            checkNotificationPermission() {
+                if ('Notification' in window) {
+                    if (Notification.permission === 'default') {
+                        this.dom.notificationPrompt.classList.add('show');
+                    }
+                }
+            }
+
+            requestNotification() {
+                if ('Notification' in window) {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            this.dom.notificationPrompt.classList.remove('show');
+                            new Notification('Zenith Focus', {
+                                body: 'Bildirimler etkinleştirildi!',
+                                icon: '🔔'
+                            });
+                        }
+                    });
+                }
+            }
+
+            sendNotification() {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    const title = this.currentMode === 'focus' ? '🎯 Odaklanma Bitti!' : '☕ Mola Bitti!';
+                    const body = this.currentMode === 'focus'
+                        ? 'Harika bir iş çıkardın! Bir mola vermeye ne dersin?'
+                        : 'Yeniden enerjik hissediyor olmalısın!';
+                    
+                    new Notification(title, {
+                        body: body,
+                        icon: '⚡',
+                        tag: 'zenith-timer'
+                    });
+                }
             }
         }
 
         window.onload = () => new ZenithApp();
+        
+        window.onbeforeunload = () => {
+            const audios = document.querySelectorAll('audio');
+            audios.forEach(a => a.pause());
+        };
     </script>
 </body>
 </html>
