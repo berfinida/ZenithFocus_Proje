@@ -11,18 +11,21 @@ https://berfinida.github.io/ZenithFocus_Proje/
 
 ---
 
-## 📌 About The Project
+## 📌 Project Purpose
 
-Zenith Focus is a modern and minimal landing page built to practice clean UI design, visual hierarchy and responsive layout principles.
+Zenith Focus was created as a modern landing page project to practice clean UI design, visual hierarchy and responsive frontend development.
+
+The main aim of this website is to build a simple, professional and focused user experience using minimal design principles.
 
 ---
 
-## 🎯 Project Goals
+## 🎯 Goals
 
-* Build a clean and modern landing page
-* Improve frontend layout skills
-* Practice UI/UX thinking
-* Create responsive design structure
+* Create a modern and clean landing page
+* Practice frontend layout structure
+* Improve UI/UX design thinking
+* Build responsive web design experience
+* Develop a strong visual hierarchy
 
 ---
 
@@ -39,7 +42,8 @@ Zenith Focus is a modern and minimal landing page built to practice clean UI des
 * Modern minimal design
 * Section-based layout
 * Responsive structure
-* Clean typography & spacing
+* Clean typography and spacing
+* User-focused visual flow
 
 ---
 
@@ -49,3 +53,9 @@ Zenith Focus is a modern and minimal landing page built to practice clean UI des
 
 * GitHub: https://github.com/berfinida
 * LinkedIn: https://www.linkedin.com/in/berfin-nida-%C3%B6zt%C3%BCrk-6a12131b7/
+
+---
+
+## 🚀 Note
+
+This project is part of my frontend development journey, focused on creating modern and visually clear web interfaces.
