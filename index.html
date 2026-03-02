@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zenith Focus // Deep Work Suite</title>
+    <meta name="description" content="Deep Work Suite - Odaklanma ve Pomodoro Timer">
+    <meta name="theme-color" content="#a5b4fc">
+    <link rel="manifest" href="manifest.json">
     
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;600&family=JetBrains+Mono:wght@200&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -40,15 +43,15 @@
             background-color: var(--bg);
             color: var(--text-main);
             font-family: 'Outfit', sans-serif;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
-            overflow: hidden;
+            align-items: flex-start;
+            padding: 20px;
         }
 
         .bg-gradient {
-            position: absolute;
+            position: fixed;
             inset: 0;
             background: radial-gradient(circle at 20% 20%, var(--accent-glow) 0%, transparent 40%),
                         radial-gradient(circle at 80% 80%, var(--accent-glow) 0%, transparent 40%);
@@ -61,574 +64,336 @@
             50% { transform: scale(1.1) translate(-5%, -5%); }
         }
 
-        .theme-toggle {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            z-index: 20;
+        /* Header toolbar for desktop */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .app-header .brand {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .app-header .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-toggle, .stats-toggle {
             background: var(--card);
             border: 1px solid var(--border);
             color: var(--text-main);
             padding: 10px 15px;
-            border-radius: 15px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
             backdrop-filter: blur(10px);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.2s ease;
         }
 
-        .theme-toggle:hover {
+        .theme-toggle:hover, .stats-toggle:hover {
             transform: scale(1.05);
             box-shadow: 0 5px 20px var(--accent-glow);
+            border-color: var(--accent);
         }
 
-        .theme-toggle:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
+        .install-prompt {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card);
+            backdrop-filter: blur(40px);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 15px 20px;
+            z-index: 100;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
+
+        .install-prompt.show { display: block; }
+        .install-prompt p { font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
+        .install-buttons { display: flex; gap: 10px; justify-content: center; }
+        .install-btn { padding: 8px 16px; border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; }
+        .install-btn.accept { background: var(--accent); color: white; }
+        .install-btn.dismiss { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
 
         .zenith-app {
             position: relative;
             z-index: 10;
-            width: 90%;
+            width: 100%;
             max-width: 480px;
-            min-height: 680px;
-            padding: 45px 35px;
+            min-height: calc(100vh - 40px);
+            padding: 30px 25px;
             background: var(--card);
             backdrop-filter: blur(40px) saturate(160%);
             border: 1px solid var(--border);
-            border-radius: 40px;
+            border-radius: 30px;
             text-align: center;
             box-shadow: 0 40px 80px rgba(0,0,0,0.15);
-            margin: auto;
+            margin: 10px 0;
         }
 
-        .brand-name {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 30px;
-        }
+        .brand-name { font-size: 10px; font-weight: 600; letter-spacing: 6px; text-transform: uppercase; color: var(--accent); margin-bottom: 25px; }
 
-        .progress-ring-container {
-            position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 0 auto;
-        }
+        .progress-ring-container { position: relative; width: 240px; height: 240px; margin: 0 auto; }
+        .progress-ring { transform: rotate(-90deg); }
+        .progress-ring__circle { transition: stroke-dashoffset 0.3s linear; }
+        .timer-wrapper { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-        .progress-ring {
-            transform: rotate(-90deg);
-        }
+        #timer-display { font-family: 'JetBrains Mono', monospace; font-size: 56px; font-weight: 200; letter-spacing: -2px; line-height: 1; transition: transform 0.3s ease; }
+        .active-timer { transform: scale(1.05); color: var(--accent); }
+        .timer-mode { font-size: 11px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
 
-        .progress-ring__circle {
-            transition: stroke-dashoffset 0.5s ease;
-        }
+        .mode-selector { display: flex; gap: 6px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
+        .mode-btn { padding: 7px 14px; border: 1px solid var(--border); background: transparent; color: var(--text-dim); border-radius: 18px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-family: inherit; }
+        .mode-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .mode-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
 
-        .timer-wrapper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
+        .custom-timer-input { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px; }
+        .custom-timer-input input { width: 55px; padding: 7px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text-main); font-size: 12px; font-family: inherit; text-align: center; }
+        .custom-timer-input span { font-size: 10px; color: var(--text-dim); }
+        .custom-warning { color: #ef4444; font-size: 9px; margin-top: 4px; display: none; }
+        .custom-warning.show { display: block; }
 
-        #timer-display {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 72px;
-            font-weight: 200;
-            letter-spacing: -4px;
-            line-height: 1;
-            transition: transform 0.3s ease;
-        }
+        .control-group { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; }
+        .btn { border: none; border-radius: 18px; font-family: inherit; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-main { flex: 2; height: 52px; background: var(--accent); color: white; font-size: 14px; }
+        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 10px 30px var(--accent-glow); }
+        .btn-icon { flex: 1; background: rgba(128, 128, 128, 0.05); border: 1px solid var(--border); color: var(--text-dim); font-size: 13px; }
+        .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
 
-        .active-timer { 
-            transform: scale(1.05); 
-            color: var(--accent); 
-        }
+        .source-selector { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+        .source-btn { display: flex; align-items: center; gap: 5px; padding: 7px 12px; border: 1px solid var(--border); background: transparent; color: var(--text-dim); border-radius: 12px; font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-family: inherit; }
+        .source-btn:hover { transform: scale(1.05); }
+        .source-btn.active { border-color: transparent; color: white; }
+        .source-btn.spotify.active { background: var(--spotify); }
+        .source-btn.youtube.active { background: var(--youtube); }
+        .source-btn.apple.active { background: var(--apple); }
+        .source-btn.local.active { background: var(--accent); }
 
-        .timer-mode {
-            font-size: 11px;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
+        .presets { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+        .preset-btn { padding: 5px 10px; border: 1px solid var(--border); background: transparent; color: var(--text-dim); border-radius: 10px; font-size: 9px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-family: inherit; }
+        .preset-btn:hover { border-color: var(--accent); color: var(--accent); transform: scale(1.05); }
+        .preset-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
 
-        .mode-selector {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
+        .mixer-panel { padding-top: 15px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
+        .mixer-panel.hidden { display: none; }
+        .mixer-panel.active { display: flex; }
+        .audio-track { display: flex; align-items: center; justify-content: space-between; }
+        .track-label { font-size: 10px; font-weight: 600; color: var(--text-dim); letter-spacing: 1px; min-width: 60px; text-align: left; }
 
-        .mode-btn {
-            padding: 8px 16px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text-dim);
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
+        input[type="range"] { -webkit-appearance: none; -moz-appearance: none; appearance: none; width: 55%; height: 4px; cursor: pointer; }
+        input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: var(--border); border-radius: 10px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: var(--accent); border-radius: 50%; cursor: pointer; margin-top: -5px; }
+        input[type="range"]::-moz-range-track { width: 100%; height: 4px; background: var(--border); border-radius: 10px; }
+        input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; background: var(--accent); border-radius: 50%; cursor: pointer; border: none; }
 
-        .mode-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
+        .youtube-container { display: none; margin-bottom: 15px; }
+        .youtube-container.active { display: block; }
+        .youtube-container iframe { width: 100%; height: 130px; border-radius: 12px; border: none; }
 
-        .mode-btn.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-        }
-
-        .mode-btn:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-
-        .control-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 20px;
-            font-family: inherit;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-main {
-            flex: 2;
-            height: 60px;
-            background: var(--accent);
-            color: white;
-            font-size: 15px;
-        }
-
-        .btn-main:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px var(--accent-glow);
-        }
-
-        .btn-main:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-
-        [data-theme="light"] .btn-main { color: #fff; }
-
-        .btn-icon {
-            flex: 1;
-            background: rgba(128, 128, 128, 0.05);
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            font-size: 14px;
-        }
-
-        .btn-icon:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .btn-icon:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-
-        /* Müzik Kaynağı Seçici */
-        .source-selector {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .source-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text-dim);
-            border-radius: 15px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        .source-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .source-btn.active {
-            border-color: transparent;
-            color: white;
-        }
-
-        .source-btn.spotify.active {
-            background: var(--spotify);
-        }
-
-        .source-btn.youtube.active {
-            background: var(--youtube);
-        }
-
-        .source-btn.apple.active {
-            background: var(--apple);
-        }
-
-        .source-btn.local.active {
-            background: var(--accent);
-        }
-
-        .mixer-panel {
-            padding-top: 30px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .mixer-panel.hidden {
-            display: none;
-        }
-
-        .audio-track {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .track-label { 
-            font-size: 11px; 
-            font-weight: 600; 
-            color: var(--text-dim); 
-            letter-spacing: 1px; 
-            min-width: 70px;
-            text-align: left;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 60%;
-            height: 3px;
-            background: var(--border);
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        input[type="range"]:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 4px;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px; 
-            height: 14px;
-            background: var(--accent);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 14px; 
-            height: 14px;
-            background: var(--accent);
-            border-radius: 50%;
-            cursor: pointer;
-            border: none;
-        }
-
-        /* YouTube Player */
-        .youtube-container {
-            display: none;
-            margin-bottom: 20px;
-        }
-
-        .youtube-container.active {
-            display: block;
-        }
-
-        .youtube-container iframe {
-            width: 100%;
-            height: 150px;
-            border-radius: 15px;
-            border: none;
-        }
-
-        /* External Player Links */
-        .external-player {
-            display: none;
-            padding: 15px;
-            border-radius: 15px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
-
-        .external-player.active {
-            display: block;
-        }
-
-        .external-player a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 12px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            color: white;
-            font-weight: 600;
-            font-size: 13px;
-            transition: transform 0.3s ease;
-        }
-
-        .external-player a:hover {
-            transform: scale(1.05);
-        }
-
+        .external-player { display: none; padding: 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--border); margin-bottom: 15px; }
+        .external-player.active { display: block; }
+        .external-player a { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 20px; text-decoration: none; color: white; font-weight: 600; font-size: 12px; transition: transform 0.3s ease; }
+        .external-player a:hover { transform: scale(1.03); }
         .spotify-link { background: var(--spotify); }
         .apple-link { background: var(--apple); }
 
-        .notification-prompt {
-            display: none;
-            margin-top: 15px;
-            font-size: 10px;
-        }
+        .notification-prompt { display: none; margin-top: 12px; font-size: 9px; }
+        .notification-prompt.show { display: block; }
+        .notification-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 5px 10px; border-radius: 8px; font-size: 9px; cursor: pointer; font-family: inherit; transition: all 0.3s ease; }
+        .notification-btn:hover { background: var(--accent); color: white; }
 
-        .notification-prompt.show {
-            display: block;
-        }
+        .footer { margin-top: 25px; font-size: 9px; color: var(--text-dim); letter-spacing: 1px; }
+        .footer span { color: var(--accent); font-weight: 600; }
 
-        .notification-btn {
-            background: transparent;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 10px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
+        .stats-panel { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 50; overflow-y: auto; padding: 20px; }
+        .stats-panel.active { display: flex; align-items: center; justify-content: center; }
+        .stats-content { max-width: 420px; width: 100%; background: var(--card); backdrop-filter: blur(40px); border: 1px solid var(--border); border-radius: 30px; padding: 30px; }
+        .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .stats-header h2 { font-size: 16px; font-weight: 600; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+        .stats-close { background: transparent; border: 1px solid var(--border); color: var(--text-dim); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 16px; transition: all 0.3s ease; }
+        .stats-close:hover { border-color: var(--accent); color: var(--accent); }
+        .stats-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .stats-card { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 15px; padding: 15px; text-align: center; }
+        .stats-card-value { font-size: 28px; font-weight: 600; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+        .stats-card-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+        .stats-chart-title { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        .stats-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding: 0 5px; margin-bottom: 10px; }
+        .chart-bar-container { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .chart-bar { width: 20px; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s ease; }
+        .chart-bar-label { font-size: 9px; color: var(--text-dim); margin-top: 5px; }
+        .chart-bar-value { font-size: 8px; color: var(--text-dim); margin-bottom: 3px; }
 
-        .notification-btn:hover {
-            background: var(--accent);
-            color: white;
-        }
+        /* ========== DESKTOP STYLES ========== */
+        
+        /* Tablet breakpoint (900px+) */
+        @media (min-width: 900px) {
+            body {
+                padding: 20px;
+                align-items: center;
+                min-height: 100vh;
+            }
 
-        .footer { 
-            margin-top: 30px; 
-            font-size: 10px; 
-            color: var(--text-dim); 
-            letter-spacing: 1px; 
-        }
+            .app-header {
+                display: flex;
+            }
 
-        .footer span {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        /* Tablet ve küçük dizüstü */
-        @media (max-width: 768px) {
             .zenith-app {
-                max-width: 380px;
-                min-height: 620px;
-                padding: 50px 30px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+                max-width: 1000px;
+                min-height: auto;
+                padding: 40px;
+                border-radius: 40px;
+                margin-top: 60px;
+            }
+
+            .brand-name {
+                grid-column: 1 / -1;
+                font-size: 12px;
+                margin-bottom: 20px;
+            }
+
+            /* Left column - Timer */
+            .timer-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mode-selector {
+                margin-bottom: 20px;
+            }
+
+            .mode-btn {
+                padding: 8px 16px;
+                font-size: 11px;
+            }
+
+            .progress-ring-container {
+                width: 280px;
+                height: 280px;
             }
 
             #timer-display {
                 font-size: 64px;
             }
 
-            .progress-ring-container {
-                width: 250px;
-                height: 250px;
-            }
-
-            .progress-ring {
-                width: 250px;
-                height: 250px;
-            }
-
-            .control-group {
-                margin-bottom: 30px;
-            }
-
-            .btn-main {
-                height: 55px;
-                font-size: 14px;
-            }
-        }
-
-        /* Mobil cihazlar */
-        @media (max-width: 480px) {
-            .zenith-app {
-                width: 95%;
-                padding: 30px 20px;
-                border-radius: 25px;
-                max-height: 95vh;
-                overflow-y: auto;
-            }
-
-            .theme-toggle {
-                top: 15px;
-                right: 15px;
-                padding: 8px 12px;
-                font-size: 11px;
-            }
-
-            #timer-display {
-                font-size: 52px;
-            }
-
             .timer-mode {
-                font-size: 10px;
+                font-size: 12px;
             }
 
-            .progress-ring-container {
-                width: 200px;
-                height: 200px;
-            }
-
-            .progress-ring {
-                width: 200px;
-                height: 200px;
-            }
-
-            .progress-ring circle {
-                r: 90;
-                cx: 100;
-                cy: 100;
-            }
-
-            .mode-selector {
-                gap: 6px;
-                margin-bottom: 20px;
-            }
-
-            .mode-btn {
-                padding: 8px 10px;
-                font-size: 10px;
-                flex: 1;
+            .custom-timer-input {
+                margin-bottom: 12px;
             }
 
             .control-group {
-                gap: 10px;
-                margin-bottom: 25px;
+                margin-bottom: 0;
             }
 
             .btn-main {
-                height: 50px;
-                font-size: 13px;
-                border-radius: 15px;
+                height: 56px;
+                font-size: 15px;
             }
 
-            .btn-icon {
-                width: 50px;
-                font-size: 18px;
-            }
-
-            .source-selector {
-                gap: 6px;
-                margin-bottom: 15px;
-            }
-
-            .source-btn {
-                padding: 8px 10px;
-                font-size: 9px;
-                flex: 1;
-                justify-content: center;
-            }
-
-            .source-btn i {
-                display: none;
-            }
-
-            .mixer-panel {
-                padding-top: 20px;
+            /* Right column - Music & Settings */
+            .music-section {
+                display: flex;
+                flex-direction: column;
                 gap: 15px;
             }
 
-            .audio-track {
-                padding: 5px 0;
+            .source-selector {
+                margin-bottom: 10px;
+            }
+
+            .source-btn {
+                padding: 8px 14px;
+                font-size: 11px;
+            }
+
+            .presets {
+                margin-bottom: 8px;
+            }
+
+            .preset-btn {
+                padding: 6px 12px;
+                font-size: 10px;
+            }
+
+            .mixer-panel {
+                padding-top: 12px;
+                gap: 10px;
             }
 
             .track-label {
-                font-size: 10px;
-                min-width: 60px;
+                font-size: 11px;
+                min-width: 70px;
             }
 
             input[type="range"] {
-                height: 24px;
-                -webkit-appearance: none;
-                background: transparent;
-            }
-
-            input[type="range"]::-webkit-slider-runnable-track {
-                height: 4px;
-                background: var(--border);
-                border-radius: 10px;
-            }
-
-            input[type="range"]::-webkit-slider-thumb {
-                width: 20px;
-                height: 20px;
-                margin-top: -8px;
-            }
-
-            .footer {
-                margin-top: 20px;
-                font-size: 9px;
+                width: 65%;
             }
 
             .youtube-container iframe {
-                height: 120px;
+                height: 140px;
             }
 
             .external-player {
-                padding: 10px;
+                padding: 14px;
             }
 
             .external-player a {
-                padding: 10px 15px;
-                font-size: 11px;
+                padding: 12px 18px;
+                font-size: 13px;
+            }
+
+            .notification-prompt {
+                margin-top: 10px;
+            }
+
+            .footer {
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                margin-top: 0;
             }
         }
 
-        /* Büyük ekranlar */
+        /* Large desktop (1200px+) */
         @media (min-width: 1200px) {
             .zenith-app {
-                max-width: 500px;
-                padding: 70px 50px;
+                max-width: 1100px;
+                padding: 50px;
+                gap: 50px;
+                border-radius: 50px;
             }
 
-            #timer-display {
-                font-size: 88px;
+            .brand-name {
+                font-size: 13px;
+                letter-spacing: 8px;
             }
 
             .progress-ring-container {
@@ -636,90 +401,267 @@
                 height: 320px;
             }
 
+            #timer-display {
+                font-size: 72px;
+            }
+
+            .timer-mode {
+                font-size: 13px;
+                letter-spacing: 3px;
+            }
+
             .mode-btn {
-                padding: 12px 20px;
+                padding: 10px 20px;
                 font-size: 12px;
+                border-radius: 22px;
+            }
+
+            .control-group {
+                gap: 15px;
+            }
+
+            .btn-main {
+                height: 60px;
+                font-size: 16px;
+                border-radius: 22px;
+            }
+
+            .btn-icon {
+                border-radius: 22px;
+                font-size: 14px;
             }
 
             .source-btn {
                 padding: 10px 18px;
                 font-size: 12px;
+                border-radius: 15px;
             }
 
-            .btn-main {
-                height: 65px;
-                font-size: 16px;
-            }
-        }
-
-        /* Yatay mobil */
-        @media (max-height: 500px) and (orientation: landscape) {
-            body {
-                height: auto;
-                min-height: 100vh;
-                padding: 20px 0;
+            .preset-btn {
+                padding: 8px 14px;
+                font-size: 11px;
+                border-radius: 12px;
             }
 
-            .zenith-app {
-                padding: 25px 30px;
+            .mixer-panel {
+                gap: 15px;
+                padding-top: 18px;
+            }
+
+            .track-label {
+                font-size: 12px;
+                min-width: 80px;
+            }
+
+            input[type="range"] {
+                width: 70%;
+                height: 5px;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                width: 18px;
+                height: 18px;
+            }
+
+            .youtube-container iframe {
+                height: 160px;
+                border-radius: 15px;
+            }
+
+            .external-player {
+                padding: 18px;
+                border-radius: 18px;
+            }
+
+            .external-player a {
+                padding: 14px 22px;
+                font-size: 14px;
                 border-radius: 25px;
             }
 
-            .progress-ring-container {
-                width: 120px;
-                height: 120px;
+            .footer {
+                font-size: 11px;
+            }
+        }
+
+        /* Ultra-wide (1600px+) */
+        @media (min-width: 1600px) {
+            body {
+                padding: 40px;
             }
 
-            #timer-display {
-                font-size: 36px;
+            .zenith-app {
+                max-width: 1200px;
+                padding: 60px;
+                gap: 60px;
+                border-radius: 60px;
             }
 
             .brand-name {
-                margin-bottom: 15px;
+                font-size: 14px;
+                letter-spacing: 10px;
+                margin-bottom: 30px;
+            }
+
+            .progress-ring-container {
+                width: 360px;
+                height: 360px;
+            }
+
+            #timer-display {
+                font-size: 80px;
             }
 
             .mode-selector {
-                margin-bottom: 15px;
+                gap: 12px;
+                margin-bottom: 30px;
             }
 
             .mode-btn {
-                padding: 5px 10px;
-                font-size: 9px;
+                padding: 12px 24px;
+                font-size: 13px;
             }
 
             .control-group {
-                margin-bottom: 15px;
+                margin-top: 10px;
             }
 
             .btn-main {
-                height: 40px;
+                height: 68px;
+                font-size: 18px;
+            }
+
+            .source-selector {
+                gap: 12px;
+            }
+
+            .source-btn {
+                padding: 12px 22px;
+                font-size: 13px;
+            }
+
+            .presets {
+                gap: 10px;
+            }
+
+            .preset-btn {
+                padding: 10px 18px;
                 font-size: 12px;
             }
 
             .mixer-panel {
-                padding-top: 15px;
-                gap: 10px;
+                gap: 20px;
+                padding-top: 25px;
+            }
+
+            .track-label {
+                font-size: 13px;
+            }
+
+            input[type="range"] {
+                height: 6px;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                width: 20px;
+                height: 20px;
+            }
+
+            .youtube-container {
+                margin-bottom: 20px;
+            }
+
+            .youtube-container iframe {
+                height: 180px;
+            }
+
+            .external-player {
+                padding: 20px;
+            }
+
+            .notification-prompt {
+                margin-top: 15px;
             }
         }
 
-        @media (prefers-contrast: high) {
-            :root {
-                --border: rgba(255, 255, 255, 0.3);
+        /* Mobile styles remain unchanged */
+        @media (max-width: 480px) {
+            .zenith-app {
+                width: 95%;
+                padding: 25px 18px;
+                border-radius: 25px;
+                min-height: calc(100vh - 20px);
             }
-            [data-theme="light"] {
-                --border: rgba(0, 0, 0, 0.3);
+
+            .progress-ring-container {
+                width: 200px;
+                height: 200px;
+            }
+
+            #timer-display {
+                font-size: 48px;
+            }
+
+            .mode-selector {
+                gap: 4px;
+            }
+
+            .mode-btn {
+                padding: 6px 10px;
+                font-size: 9px;
+            }
+
+            .control-group {
+                gap: 8px;
+                margin-bottom: 25px;
+            }
+
+            .btn-main {
+                height: 48px;
+                font-size: 13px;
+            }
+
+            .source-selector {
+                gap: 5px;
+            }
+
+            .source-btn {
+                padding: 6px 10px;
+                font-size: 9px;
+            }
+
+            .presets {
+                gap: 4px;
+            }
+
+            .preset-btn {
+                padding: 4px 8px;
+                font-size: 8px;
+            }
+
+            .mixer-panel {
+                gap: 10px;
+                padding-top: 12px;
+            }
+
+            .track-label {
+                font-size: 9px;
+                min-width: 50px;
+            }
+
+            input[type="range"] {
+                width: 50%;
+            }
+
+            .footer {
+                font-size: 8px;
+                margin-top: 20px;
             }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
-            
-            .bg-gradient {
-                animation: none;
-            }
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+            .bg-gradient { animation: none; }
         }
     </style>
 </head>
@@ -727,99 +669,162 @@
 
     <div class="bg-gradient" aria-hidden="true"></div>
 
-    <button class="theme-toggle" id="theme-btn" aria-label="Tema değiştir">
-        🌙 GECE MODU
-    </button>
+    <!-- Desktop Header -->
+    <header class="app-header">
+        <div class="brand">Zenıth Focus</div>
+        <div class="header-actions">
+            <button class="theme-toggle" id="theme-btn" aria-label="Tema değiştir">🌙 GECE MODU</button>
+            <button class="stats-toggle" id="stats-btn" aria-label="İstatistikler">📊 İSTATİSTİKLER</button>
+        </div>
+    </header>
+
+    <!-- Mobile-only buttons -->
+    <button class="theme-toggle mobile-only" id="theme-btn-mobile" style="position:fixed;top:15px;right:15px;z-index:20;display:none;" aria-label="Tema değiştir">🌙</button>
+    <button class="stats-toggle mobile-only" id="stats-btn-mobile" style="position:fixed;top:15px;left:15px;z-index:20;display:none;" aria-label="İstatistikler">📊</button>
 
     <main class="zenith-app">
-        <div class="brand-name">Zenith Focus</div>
+        <div class="brand-name">Zenıth Focus</div>
 
-        <div class="mode-selector" role="group" aria-label="Timer modu seç">
-            <button class="mode-btn active" data-mode="focus" data-time="25" aria-pressed="true">ODAK (25 dk)</button>
-            <button class="mode-btn" data-mode="short" data-time="5" aria-pressed="false">KISA MOLA (5 dk)</button>
-            <button class="mode-btn" data-mode="long" data-time="15" aria-pressed="false">UZUN MOLA (15 dk)</button>
-        </div>
+        <!-- Left Column - Timer -->
+        <div class="timer-section">
+            <div class="mode-selector" role="group" aria-label="Timer modu seç">
+                <button class="mode-btn active" data-mode="focus" data-time="25" aria-pressed="true">ODAK (25 dk)</button>
+                <button class="mode-btn" data-mode="short" data-time="5" aria-pressed="false">KISA MOLA (5 dk)</button>
+                <button class="mode-btn" data-mode="long" data-time="15" aria-pressed="false">UZUN MOLA (15 dk)</button>
+                <button class="mode-btn" data-mode="custom" data-time="0" aria-pressed="false">ÖZEL</button>
+            </div>
 
-        <div class="progress-ring-container">
-            <svg class="progress-ring" width="280" height="280" aria-hidden="true">
-                <circle class="progress-ring__bg" stroke="var(--progress-bg)" stroke-width="4" fill="transparent" r="130" cx="140" cy="140"/>
-                <circle class="progress-ring__circle" stroke="var(--accent)" stroke-width="4" fill="transparent" r="130" cx="140" cy="140" stroke-linecap="round"/>
-            </svg>
-            <div class="timer-wrapper">
-                <div class="timer-mode" id="timer-mode">ODAK</div>
-                <h1 id="timer-display" role="timer" aria-live="polite" aria-atomic="true">25:00</h1>
+            <div class="custom-timer-input" id="custom-timer-container" style="display: none;">
+                <input type="number" id="custom-minutes" min="1" max="180" value="25" aria-label="Özel süre (dakika)">
+                <span>dk</span>
+                <div class="custom-warning" id="custom-warning">1-180 dk arası giriniz</div>
+            </div>
+
+            <div class="progress-ring-container">
+                <svg class="progress-ring" width="100%" height="100%" viewBox="0 0 280 280" aria-hidden="true">
+                    <circle class="progress-ring__bg" stroke="var(--progress-bg)" stroke-width="4" fill="transparent" r="130" cx="140" cy="140"/>
+                    <circle class="progress-ring__circle" stroke="var(--accent)" stroke-width="4" fill="transparent" r="130" cx="140" cy="140" stroke-linecap="round"/>
+                </svg>
+                <div class="timer-wrapper">
+                    <div class="timer-mode" id="timer-mode">ODAK</div>
+                    <h1 id="timer-display" role="timer" aria-live="polite" aria-atomic="true">25:00</h1>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <button class="btn btn-main" id="start-btn" aria-label="Timer'ı başlat">Start Focus</button>
+                <button class="btn btn-icon" id="reset-btn" aria-label="Timer'ı sıfırla">↺</button>
             </div>
         </div>
 
-        <div class="control-group">
-            <button class="btn btn-main" id="start-btn" aria-label="Timer'ı başlat">Start Focus</button>
-            <button class="btn btn-icon" id="reset-btn" aria-label="Timer'ı sıfırla">↺</button>
-        </div>
-
-        <!-- Müzik Kaynağı Seçici -->
-        <div class="source-selector" role="group" aria-label="Müzik kaynağı seç">
-            <button class="source-btn local active" data-source="local" aria-pressed="true">
-                <i class="fas fa-music"></i> Yerel
-            </button>
-            <button class="source-btn youtube" data-source="youtube" aria-pressed="false">
-                <i class="fab fa-youtube"></i> YouTube
-            </button>
-            <button class="source-btn spotify" data-source="spotify" aria-pressed="false">
-                <i class="fab fa-spotify"></i> Spotify
-            </button>
-            <button class="source-btn apple" data-source="apple" aria-pressed="false">
-                <i class="fab fa-apple"></i> Apple
-            </button>
-        </div>
-
-        <!-- YouTube Player -->
-        <div class="youtube-container" id="youtube-container">
-            <div id="youtube-player"></div>
-        </div>
-
-        <!-- External Player Links -->
-        <div class="external-player" id="spotify-player">
-            <a href="https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd" target="_blank" class="spotify-link">
-                <i class="fab fa-spotify"></i> Spotify'da Odak playlist'i aç
-            </a>
-        </div>
-
-        <div class="external-player" id="apple-player">
-            <a href="https://music.apple.com/tr/playlist/focus/pl.4a4f2a3a8e2a4b3" target="_blank" class="apple-link">
-                <i class="fab fa-apple"></i> Apple Music'te Focus playlist'i aç
-            </a>
-        </div>
-
-        <!-- Yerel Ses Mixer -->
-        <div class="mixer-panel" id="local-mixer" aria-label="Ses mixer'ı">
-            <div class="audio-track">
-                <span class="track-label">🌧️ RAIN</span>
-                <input type="range" class="vol-slider" data-src="rain" min="0" max="1" step="0.01" value="0" aria-label="Yağmur sesi hacmi">
+        <!-- Right Column - Music & Settings -->
+        <div class="music-section">
+            <div class="source-selector" role="group" aria-label="Müzik kaynağı seç">
+                <button class="source-btn local active" data-source="local" aria-pressed="true">
+                    <i class="fas fa-music"></i> Yerel
+                </button>
+                <button class="source-btn youtube" data-source="youtube" aria-pressed="false">
+                    <i class="fab fa-youtube"></i> YouTube
+                </button>
+                <button class="source-btn spotify" data-source="spotify" aria-pressed="false">
+                    <i class="fab fa-spotify"></i> Spotify
+                </button>
+                <button class="source-btn apple" data-source="apple" aria-pressed="false">
+                    <i class="fab fa-apple"></i> Apple
+                </button>
             </div>
-            <div class="audio-track">
-                <span class="track-label">🌲 FOREST</span>
-                <input type="range" class="vol-slider" data-src="forest" min="0" max="1" step="0.01" value="0" aria-label="Orman sesi hacmi">
-            </div>
-            <div class="audio-track">
-                <span class="track-label">🔥 FIRE</span>
-                <input type="range" class="vol-slider" data-src="fire" min="0" max="1" step="0.01" value="0" aria-label="Ateş sesi hacmi">
-            </div>
-            <div class="audio-track">
-                <span class="track-label">☕ CAFE</span>
-                <input type="range" class="vol-slider" data-src="cafe" min="0" max="1" step="0.01" value="0" aria-label="Kafe sesi hacmi">
-            </div>
-        </div>
 
-        <div class="notification-prompt" id="notification-prompt">
-            <button class="notification-btn" id="notification-btn">🔔 Bildirimlere İzin Ver</button>
-        </div>
+            <div class="presets" id="presets">
+                <button class="preset-btn" data-preset="deepRain">🌧️ Deep Rain</button>
+                <button class="preset-btn" data-preset="forestCalm">🌲 Forest Calm</button>
+                <button class="preset-btn" data-preset="cafeStudy">☕ Cafe Study</button>
+            </div>
 
-        <div class="footer">
-            TAMAMLANAN OTURUMLAR: <span id="streak">0</span>
+            <div class="youtube-container" id="youtube-container">
+                <div id="youtube-player"></div>
+            </div>
+
+            <div class="external-player" id="spotify-player">
+                <a href="https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd" target="_blank" class="spotify-link">
+                    <i class="fab fa-spotify"></i> Spotify'da Odak playlist'i aç
+                </a>
+            </div>
+
+            <div class="external-player" id="apple-player">
+                <a href="https://music.apple.com/tr/playlist/focus/pl.4a4f2a3a8e2a4b3" target="_blank" class="apple-link">
+                    <i class="fab fa-apple"></i> Apple Music'te Focus playlist'i aç
+                </a>
+            </div>
+
+            <div class="mixer-panel" id="local-mixer" aria-label="Ses mixer'ı">
+                <div class="audio-track">
+                    <span class="track-label">🌧️ RAIN</span>
+                    <input type="range" class="vol-slider" data-src="rain" min="0" max="1" step="0.01" value="0" aria-label="Yağmur sesi hacmi">
+                </div>
+                <div class="audio-track">
+                    <span class="track-label">🌲 FOREST</span>
+                    <input type="range" class="vol-slider" data-src="forest" min="0" max="1" step="0.01" value="0" aria-label="Orman sesi hacmi">
+                </div>
+                <div class="audio-track">
+                    <span class="track-label">🔥 FIRE</span>
+                    <input type="range" class="vol-slider" data-src="fire" min="0" max="1" step="0.01" value="0" aria-label="Ateş sesi hacmi">
+                </div>
+                <div class="audio-track">
+                    <span class="track-label">☕ CAFE</span>
+                    <input type="range" class="vol-slider" data-src="cafe" min="0" max="1" step="0.01" value="0" aria-label="Kafe sesi hacmi">
+                </div>
+            </div>
+
+            <div class="notification-prompt" id="notification-prompt">
+                <button class="notification-btn" id="notification-btn">🔔 Bildirimlere İzin Ver</button>
+            </div>
+
+            <div class="footer">
+                TAMAMLANAN OTURUMLAR: <span id="streak">0</span>
+            </div>
         </div>
     </main>
 
-    <!-- Yerel Ses Dosyaları -->
+    <!-- Install Prompt -->
+    <div class="install-prompt" id="install-prompt">
+        <p>Zenith Focus'u uygulama olarak yükleyin</p>
+        <div class="install-buttons">
+            <button class="install-btn accept" id="install-accept">Yükle</button>
+            <button class="install-btn dismiss" id="install-dismiss">Kapat</button>
+        </div>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="stats-panel" id="stats-panel">
+        <div class="stats-content">
+            <div class="stats-header">
+                <h2>📊 İstatistikler</h2>
+                <button class="stats-close" id="stats-close">✕</button>
+            </div>
+            <div class="stats-summary">
+                <div class="stats-card">
+                    <div class="stats-card-value" id="today-minutes">0</div>
+                    <div class="stats-card-label">Bugünkü Dakika</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-value" id="total-sessions">0</div>
+                    <div class="stats-card-label">Toplam Oturum</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-value" id="week-minutes">0</div>
+                    <div class="stats-card-label">Bu Hafta</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-value" id="avg-session">0</div>
+                    <div class="stats-card-label">ort. Dakika</div>
+                </div>
+            </div>
+            <div class="stats-chart-title">Son 7 Gün</div>
+            <div class="stats-chart" id="stats-chart"></div>
+        </div>
+    </div>
+
+    <!-- Audio Files -->
     <audio id="audio-rain" loop preload="auto">
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-light-rain-loop-2393.mp3" type="audio/mpeg">
     </audio>
@@ -836,34 +841,93 @@
         <source src="https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
+        // Mobile button handling for desktop
+        const isDesktop = window.innerWidth >= 900;
+        
+        if (!isDesktop) {
+            document.getElementById('theme-btn').style.display = 'none';
+            document.getElementById('stats-btn').style.display = 'none';
+            document.getElementById('theme-btn-mobile').style.display = 'block';
+            document.getElementById('stats-btn-mobile').style.display = 'block';
+        }
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('SW registered:', reg.scope))
+                    .catch(err => console.log('SW registration failed:', err));
+            });
+        }
+
+        // Install Prompt Handling
+        let deferredPrompt;
+        const installPrompt = document.getElementById('install-prompt');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (!localStorage.getItem('zenith_install_dismissed')) {
+                installPrompt.classList.add('show');
+            }
+        });
+
+        document.getElementById('install-accept').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') console.log('PWA installed');
+                deferredPrompt = null;
+                installPrompt.classList.remove('show');
+            }
+        });
+
+        document.getElementById('install-dismiss').addEventListener('click', () => {
+            installPrompt.classList.remove('show');
+            localStorage.setItem('zenith_install_dismissed', 'true');
+        });
+
+        // App Class
         class ZenithApp {
             constructor() {
                 this.modes = {
                     focus: { time: 25 * 60, label: 'ODAK' },
                     short: { time: 5 * 60, label: 'KISA MOLA' },
-                    long: { time: 15 * 60, label: 'UZUN MOLA' }
+                    long: { time: 15 * 60, label: 'UZUN MOLA' },
+                    custom: { time: 25 * 60, label: 'ÖZEL' }
                 };
                 
+                this.customTime = 25;
                 this.currentMode = 'focus';
                 this.timeLeft = this.modes[this.currentMode].time;
                 this.totalTime = this.timeLeft;
                 this.isRunning = false;
                 this.interval = null;
+                this.settingsKey = 'zenith_settings_v1';
                 this.theme = 'dark';
-                this.sessions = this.loadSessions();
+                this.sessions = 0;
                 this.audioLoaded = {};
                 this.currentSource = 'local';
                 this.youtubePlayer = null;
+                this.youtubeApiReady = false;
+                this.pendingYoutubeInit = false;
+                this.sessionHistory = [];
+                
+                this.presets = {
+                    deepRain: { rain: 0.6, cafe: 0.1, forest: 0, fire: 0 },
+                    forestCalm: { forest: 0.5, fire: 0.2, rain: 0, cafe: 0 },
+                    cafeStudy: { cafe: 0.6, rain: 0.15, forest: 0, fire: 0 }
+                };
                 
                 this.progressRing = document.querySelector('.progress-ring__circle');
                 this.progressRing.style.strokeDasharray = `${2 * Math.PI * 130}`;
                 this.progressRing.style.strokeDashoffset = 0;
                 
                 this.init();
+                this.initYouTubeAPI();
             }
 
             init() {
@@ -874,7 +938,13 @@
                     startBtn: document.getElementById('start-btn'),
                     resetBtn: document.getElementById('reset-btn'),
                     themeBtn: document.getElementById('theme-btn'),
+                    themeBtnMobile: document.getElementById('theme-btn-mobile'),
+                    statsBtn: document.getElementById('stats-btn'),
+                    statsBtnMobile: document.getElementById('stats-btn-mobile'),
+                    statsPanel: document.getElementById('stats-panel'),
+                    statsClose: document.getElementById('stats-close'),
                     sliders: document.querySelectorAll('.vol-slider'),
+                    presetBtns: document.querySelectorAll('.preset-btn'),
                     modeBtns: document.querySelectorAll('.mode-btn'),
                     sourceBtns: document.querySelectorAll('.source-btn'),
                     streak: document.getElementById('streak'),
@@ -883,54 +953,278 @@
                     localMixer: document.getElementById('local-mixer'),
                     youtubeContainer: document.getElementById('youtube-container'),
                     spotifyPlayer: document.getElementById('spotify-player'),
-                    applePlayer: document.getElementById('apple-player')
+                    applePlayer: document.getElementById('apple-player'),
+                    customTimerContainer: document.getElementById('custom-timer-container'),
+                    customMinutes: document.getElementById('custom-minutes'),
+                    customWarning: document.getElementById('custom-warning'),
+                    todayMinutes: document.getElementById('today-minutes'),
+                    totalSessions: document.getElementById('total-sessions'),
+                    weekMinutes: document.getElementById('week-minutes'),
+                    avgSession: document.getElementById('avg-session'),
+                    statsChart: document.getElementById('stats-chart')
                 };
 
                 this.bindEvents();
-                this.loadTheme();
-                this.loadAudioVolumes();
+                this.migrateSettings();
+                this.loadSettings();
+                this.loadSessionHistory();
                 this.updateStreak();
                 this.checkNotificationPermission();
                 this.preloadAudio();
             }
 
+            applyPreset(presetName) {
+                const preset = this.presets[presetName];
+                if (!preset) return;
+                
+                this.dom.sliders.forEach(slider => {
+                    const src = slider.dataset.src;
+                    slider.value = preset[src] || 0;
+                    const audio = document.getElementById(`audio-${src}`);
+                    if (audio) {
+                        audio.volume = preset[src] || 0;
+                        if (preset[src] > 0 && this.isRunning && this.currentSource === 'local') {
+                            audio.play().catch(() => {});
+                        }
+                    }
+                });
+                
+                this.dom.presetBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.preset === presetName);
+                });
+                
+                this.saveSettings();
+            }
+
+            loadSessionHistory() {
+                const saved = localStorage.getItem('zenith_session_history');
+                if (saved) this.sessionHistory = JSON.parse(saved);
+            }
+
+            saveSessionHistory() {
+                localStorage.setItem('zenith_session_history', JSON.stringify(this.sessionHistory));
+            }
+
+            addSession(mode, duration) {
+                this.sessionHistory.push({ timestamp: Date.now(), mode: mode, duration: duration });
+                this.saveSessionHistory();
+            }
+
+            getTodayMinutes() {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return this.sessionHistory
+                    .filter(s => s.timestamp >= today.getTime() && (s.mode === 'focus' || s.mode === 'custom'))
+                    .reduce((sum, s) => sum + Math.floor(s.duration / 60), 0);
+            }
+
+            getWeekMinutes() {
+                const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                weekAgo.setHours(0, 0, 0, 0);
+                return this.sessionHistory
+                    .filter(s => s.timestamp >= weekAgo.getTime() && (s.mode === 'focus' || s.mode === 'custom'))
+                    .reduce((sum, s) => sum + Math.floor(s.duration / 60), 0);
+            }
+
+            getLast7Days() {
+                const days = [];
+                const dayNames = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+                
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    date.setHours(0, 0, 0, 0);
+                    const dayStart = date.getTime();
+                    const dayEnd = dayStart + 24 * 60 * 60 * 1000;
+                    const dayMinutes = this.sessionHistory
+                        .filter(s => s.timestamp >= dayStart && s.timestamp < dayEnd && (s.mode === 'focus' || s.mode === 'custom'))
+                        .reduce((sum, s) => sum + Math.floor(s.duration / 60), 0);
+                    days.push({ label: dayNames[date.getDay()], minutes: dayMinutes });
+                }
+                return days;
+            }
+
+            updateStats() {
+                const todayMins = this.getTodayMinutes();
+                const weekMins = this.getWeekMinutes();
+                const totalFocusSessions = this.sessionHistory.filter(s => s.mode === 'focus' || s.mode === 'custom').length;
+                const avgMins = totalFocusSessions > 0 ? Math.round(weekMins / 7) : 0;
+                
+                this.dom.todayMinutes.textContent = todayMins;
+                this.dom.totalSessions.textContent = totalFocusSessions;
+                this.dom.weekMinutes.textContent = weekMins;
+                this.dom.avgSession.textContent = avgMins;
+                
+                const last7Days = this.getLast7Days();
+                const maxMinutes = Math.max(...last7Days.map(d => d.minutes), 1);
+                
+                this.dom.statsChart.innerHTML = last7Days.map(day => {
+                    const height = Math.max((day.minutes / maxMinutes) * 80, 4);
+                    return `<div class="chart-bar-container"><div class="chart-bar-value">${day.minutes}</div><div class="chart-bar" style="height: ${height}px;"></div><div class="chart-bar-label">${day.label}</div></div>`;
+                }).join('');
+            }
+
+            migrateSettings() {
+                const oldTheme = localStorage.getItem('zenith_theme');
+                const oldSource = localStorage.getItem('zenith_source');
+                const oldSessions = localStorage.getItem('zenith_sessions');
+                const oldVolumes = localStorage.getItem('zenith_volumes');
+                
+                if (oldTheme || oldSource || oldSessions || oldVolumes) {
+                    const settings = {
+                        theme: oldTheme || 'dark',
+                        source: oldSource || 'local',
+                        sessions: oldSessions ? parseInt(oldSessions, 10) : 0,
+                        volumes: oldVolumes ? JSON.parse(oldVolumes) : {},
+                        customTime: this.customTime
+                    };
+                    localStorage.setItem(this.settingsKey, JSON.stringify(settings));
+                }
+            }
+
+            loadSettings() {
+                const saved = localStorage.getItem(this.settingsKey);
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    
+                    if (settings.theme) {
+                        this.theme = settings.theme;
+                        this.dom.body.setAttribute('data-theme', this.theme);
+                        const themeBtnText = this.theme === 'dark' ? '🌙 GECE MODU' : '☀️ GÜNDÜZ MODU';
+                        this.dom.themeBtn.innerText = themeBtnText;
+                        if (this.dom.themeBtnMobile) this.dom.themeBtnMobile.innerText = this.theme === 'dark' ? '🌙' : '☀️';
+                    }
+                    
+                    if (settings.sessions) this.sessions = settings.sessions;
+                    
+                    if (settings.customTime && settings.customTime >= 1 && settings.customTime <= 180) {
+                        this.customTime = settings.customTime;
+                        this.dom.customMinutes.value = this.customTime;
+                        this.modes.custom.time = this.customTime * 60;
+                    }
+                    
+                    if (settings.source) this.setSource(settings.source);
+                    
+                    if (settings.volumes) {
+                        this.dom.sliders.forEach(s => {
+                            if (settings.volumes[s.dataset.src] !== undefined) {
+                                s.value = settings.volumes[s.dataset.src];
+                                const audio = document.getElementById(`audio-${s.dataset.src}`);
+                                if (audio && settings.volumes[s.dataset.src] > 0) {
+                                    audio.volume = settings.volumes[s.dataset.src];
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+                        this.toggleTheme();
+                    }
+                }
+            }
+
+            saveSettings() {
+                const volumes = {};
+                this.dom.sliders.forEach(s => volumes[s.dataset.src] = s.value);
+                
+                const settings = {
+                    theme: this.theme,
+                    source: this.currentSource,
+                    sessions: this.sessions,
+                    volumes: volumes,
+                    customTime: this.customTime
+                };
+                localStorage.setItem(this.settingsKey, JSON.stringify(settings));
+            }
+
             bindEvents() {
                 this.dom.startBtn.onclick = () => this.toggleTimer();
                 this.dom.resetBtn.onclick = () => this.resetTimer();
+                
+                // Handle both desktop and mobile theme buttons
                 this.dom.themeBtn.onclick = () => this.toggleTheme();
+                if (this.dom.themeBtnMobile) this.dom.themeBtnMobile.onclick = () => this.toggleTheme();
+                
+                this.dom.statsBtn.onclick = () => this.toggleStats();
+                if (this.dom.statsBtnMobile) this.dom.statsBtnMobile.onclick = () => this.toggleStats();
+                
+                this.dom.statsClose.onclick = () => this.toggleStats();
                 this.dom.notificationBtn.onclick = () => this.requestNotification();
                 
-                this.dom.modeBtns.forEach(btn => {
-                    btn.onclick = () => this.setMode(btn.dataset.mode);
-                });
+                this.dom.modeBtns.forEach(btn => btn.onclick = () => this.setMode(btn.dataset.mode));
+                this.dom.customMinutes.oninput = (e) => this.handleCustomTime(e);
+                this.dom.customMinutes.onchange = (e) => this.handleCustomTime(e);
+                this.dom.sourceBtns.forEach(btn => btn.onclick = () => this.setSource(btn.dataset.source));
                 
-                this.dom.sourceBtns.forEach(btn => {
-                    btn.onclick = () => this.setSource(btn.dataset.source);
-                });
+                this.dom.presetBtns.forEach(btn => btn.onclick = () => this.applyPreset(btn.dataset.preset));
                 
                 this.dom.sliders.forEach(s => {
                     s.oninput = (e) => this.handleAudio(e);
-                    s.onchange = () => this.saveAudioVolumes();
+                    s.onchange = () => {
+                        this.dom.presetBtns.forEach(btn => btn.classList.remove('active'));
+                        this.saveSettings();
+                    };
                 });
                 
                 document.onkeydown = (e) => {
-                    if (e.code === 'Space' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
-                        e.preventDefault();
-                        this.toggleTimer();
-                    }
-                    if (e.code === 'Escape') {
-                        this.resetTimer();
-                    }
+                    const isInputElement = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable;
+                    if (e.code === 'Space' && !isInputElement) { e.preventDefault(); this.toggleTimer(); }
+                    if (e.code === 'Escape') { e.preventDefault(); this.handleEscape(); }
                 };
             }
 
-            setMode(mode) {
-                if (this.isRunning) {
-                    this.toggleTimer();
+            toggleStats() {
+                this.dom.statsPanel.classList.toggle('active');
+                if (this.dom.statsPanel.classList.contains('active')) this.updateStats();
+            }
+
+            handleEscape() {
+                const modal = document.querySelector('.finish-modal');
+                if (modal) { modal.remove(); this.resetTimer(); }
+                else if (this.isRunning) this.toggleTimer();
+                else this.resetTimer();
+                
+                if (this.dom.statsPanel.classList.contains('active')) {
+                    this.dom.statsPanel.classList.remove('active');
                 }
+            }
+
+            handleCustomTime(e) {
+                const value = parseInt(e.target.value, 10);
+                
+                if (isNaN(value) || value < 1 || value > 180) {
+                    this.dom.customWarning.classList.add('show');
+                    e.target.value = this.customTime;
+                } else {
+                    this.dom.customWarning.classList.remove('show');
+                    this.customTime = value;
+                    this.modes.custom.time = value * 60;
+                    
+                    if (this.currentMode === 'custom') {
+                        this.timeLeft = this.modes.custom.time;
+                        this.totalTime = this.timeLeft;
+                        this.updateDisplay();
+                        this.resetProgressRing();
+                        this.updateProgress();
+                    }
+                    
+                    this.saveSettings();
+                }
+            }
+
+            setMode(mode) {
+                if (this.isRunning) this.toggleTimer();
                 
                 this.currentMode = mode;
-                this.timeLeft = this.modes[mode].time;
+                this.dom.customTimerContainer.style.display = mode === 'custom' ? 'flex' : 'none';
+                
+                if (mode === 'custom') {
+                    this.modes.custom.time = this.customTime * 60;
+                    this.timeLeft = this.modes.custom.time;
+                } else {
+                    this.timeLeft = this.modes[mode].time;
+                }
+                
                 this.totalTime = this.timeLeft;
                 this.dom.timerMode.innerText = this.modes[mode].label;
                 
@@ -942,76 +1236,75 @@
                 
                 this.dom.startBtn.innerText = mode === 'focus' ? 'Start Focus' : 'Start Break';
                 this.updateDisplay();
+                this.resetProgressRing();
                 this.updateProgress();
+                
+                if (mode !== 'focus' && this.currentSource === 'local') {
+                    this.pauseLocalAudio();
+                }
             }
 
-            // Müzik kaynağı değiştirme
             setSource(source) {
                 this.currentSource = source;
                 
-                // Tüm butonları güncelle
                 this.dom.sourceBtns.forEach(btn => {
                     const isActive = btn.dataset.source === source;
                     btn.classList.toggle('active', isActive);
                     btn.setAttribute('aria-pressed', isActive);
                 });
                 
-                // Panel gösterimi
                 this.dom.localMixer.classList.toggle('active', source === 'local');
                 this.dom.localMixer.classList.toggle('hidden', source !== 'local');
                 this.dom.youtubeContainer.classList.toggle('active', source === 'youtube');
                 this.dom.spotifyPlayer.classList.toggle('active', source === 'spotify');
                 this.dom.applePlayer.classList.toggle('active', source === 'apple');
                 
-                // YouTube player başlat
-                if (source === 'youtube') {
-                    this.initYouTube();
-                }
+                if (source === 'youtube') this.initYouTube();
                 
-                // Diğer sesleri durdur
                 this.stopAllAudio();
-                
-                localStorage.setItem('zenith_source', source);
+                this.saveSettings();
             }
 
-            // YouTube Player başlat
+            initYouTubeAPI() {
+                window.onYouTubeIframeAPIReady = () => {
+                    this.youtubeApiReady = true;
+                    if (this.pendingYoutubeInit) this.createYoutubePlayer();
+                };
+            }
+
             initYouTube() {
                 if (this.youtubePlayer) return;
                 
-                // YouTube API yüklendiyse player oluştur
-                if (typeof YT !== 'undefined' && YT.Player) {
-                    this.youtubePlayer = new YT.Player('youtube-player', {
-                        height: '150',
-                        width: '100%',
-                        playerVars: {
-                            'autoplay': 0,
-                            'controls': 1,
-                            'loop': 1,
-                            'playlist': 'jfKfPfyJRdk', // Lofi girl stream
-                            'modestbranding': 1,
-                            'rel': 0
-                        },
-                        events: {
-                            'onReady': (event) => {
-                                event.target.setVolume(50);
-                            }
-                        }
-                    });
+                const playerContainer = document.getElementById('youtube-player');
+                if (playerContainer) {
+                    playerContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:150px;color:var(--text-dim);font-size:12px;"><i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i> YouTube yükleniyor...</div>';
+                }
+                
+                if (this.youtubeApiReady && typeof YT !== 'undefined' && YT.Player) {
+                    this.createYoutubePlayer();
+                } else {
+                    this.pendingYoutubeInit = true;
                 }
             }
 
-            // Tüm sesleri durdur
+            createYoutubePlayer() {
+                if (this.youtubePlayer) return;
+                this.pendingYoutubeInit = false;
+                
+                this.youtubePlayer = new YT.Player('youtube-player', {
+                    height: '100%',
+                    width: '100%',
+                    playerVars: { 'autoplay': 0, 'controls': 1, 'loop': 1, 'playlist': 'jfKfPfyJRdk', 'modestbranding': 1, 'rel': 0 },
+                    events: { 'onReady': (event) => event.target.setVolume(50) }
+                });
+            }
+
             stopAllAudio() {
-                // Yerel sesleri durdur
                 ['rain', 'forest', 'fire', 'cafe'].forEach(id => {
                     const audio = document.getElementById(`audio-${id}`);
-                    if (audio) {
-                        audio.pause();
-                        audio.currentTime = 0;
-                    }
+                    if (audio) { audio.pause(); audio.currentTime = 0; }
                 });
                 
-                // YouTube'u durdur
                 if (this.youtubePlayer && this.youtubePlayer.stopVideo) {
                     this.youtubePlayer.stopVideo();
                 }
@@ -1020,40 +1313,19 @@
             toggleTheme() {
                 this.theme = this.theme === 'dark' ? 'light' : 'dark';
                 this.dom.body.setAttribute('data-theme', this.theme);
-                this.dom.themeBtn.innerText = this.theme === 'dark' ? '🌙 GECE MODU' : '☀️ GÜNDÜZ MODU';
-                localStorage.setItem('zenith_theme', this.theme);
-            }
-
-            loadTheme() {
-                const saved = localStorage.getItem('zenith_theme');
-                if (saved) {
-                    this.theme = saved;
-                    this.dom.body.setAttribute('data-theme', this.theme);
-                    this.dom.themeBtn.innerText = this.theme === 'dark' ? '🌙 GECE MODU' : '☀️ GÜNDÜZ MODU';
-                }
-                
-                if (!saved && window.matchMedia('(prefers-color-scheme: light)').matches) {
-                    this.toggleTheme();
-                }
-                
-                // Kaydedilmiş müzik kaynağını yükle
-                const savedSource = localStorage.getItem('zenith_source');
-                if (savedSource) {
-                    this.setSource(savedSource);
-                }
+                const themeBtnText = this.theme === 'dark' ? '🌙 GECE MODU' : '☀️ GÜNDÜZ MODU';
+                this.dom.themeBtn.innerText = themeBtnText;
+                if (this.dom.themeBtnMobile) this.dom.themeBtnMobile.innerText = this.theme === 'dark' ? '🌙' : '☀️';
+                this.saveSettings();
             }
 
             toggleTimer() {
                 this.isRunning = !this.isRunning;
-                this.dom.startBtn.innerText = this.isRunning 
-                    ? '⏸ Pause' 
-                    : (this.currentMode === 'focus' ? 'Start Focus' : 'Start Break');
+                this.dom.startBtn.innerText = this.isRunning ? '⏸ Pause' : (this.currentMode === 'focus' ? 'Start Focus' : 'Start Break');
                 this.dom.timer.classList.toggle('active-timer', this.isRunning);
 
                 if (this.isRunning) {
-                    // Müzik kaynağına göre otomatik çal
                     this.playMusic();
-                    
                     this.interval = setInterval(() => {
                         if (this.timeLeft > 0) {
                             this.timeLeft--;
@@ -1073,28 +1345,69 @@
             resetTimer() {
                 clearInterval(this.interval);
                 this.isRunning = false;
+                
+                if (this.currentMode === 'custom') {
+                    this.modes.custom.time = this.customTime * 60;
+                }
+                
                 this.timeLeft = this.modes[this.currentMode].time;
                 this.totalTime = this.timeLeft;
                 this.dom.startBtn.innerText = this.currentMode === 'focus' ? 'Start Focus' : 'Start Break';
                 this.dom.timer.classList.remove('active-timer');
                 this.updateDisplay();
+                this.resetProgressRing();
                 this.updateProgress();
                 document.title = 'Zenith Focus // Deep Work Suite';
                 this.pauseMusic();
             }
 
-            // Timer başlayınca müzik çal
+            resetProgressRing() {
+                this.progressRing.style.transition = 'none';
+                this.progressRing.style.strokeDashoffset = 0;
+                requestAnimationFrame(() => {
+                    this.progressRing.style.transition = 'stroke-dashoffset 0.3s linear';
+                });
+            }
+
             playMusic() {
                 if (this.currentSource === 'youtube' && this.youtubePlayer && this.youtubePlayer.playVideo) {
                     this.youtubePlayer.playVideo();
                 }
+                if (this.currentSource === 'local') this.playLocalAudio();
             }
 
-            // Timer durunca müzik durdur
             pauseMusic() {
                 if (this.currentSource === 'youtube' && this.youtubePlayer && this.youtubePlayer.pauseVideo) {
                     this.youtubePlayer.pauseVideo();
                 }
+                if (this.currentSource === 'local') this.pauseLocalAudioNoReset();
+            }
+
+            playLocalAudio() {
+                this.dom.sliders.forEach(slider => {
+                    const value = parseFloat(slider.value);
+                    if (value > 0) {
+                        const audio = document.getElementById(`audio-${slider.dataset.src}`);
+                        if (audio && audio.paused) {
+                            audio.volume = value;
+                            audio.play().catch(err => console.log('Audio play error:', err));
+                        }
+                    }
+                });
+            }
+
+            pauseLocalAudio() {
+                ['rain', 'forest', 'fire', 'cafe'].forEach(id => {
+                    const audio = document.getElementById(`audio-${id}`);
+                    if (audio) { audio.pause(); audio.currentTime = 0; }
+                });
+            }
+
+            pauseLocalAudioNoReset() {
+                ['rain', 'forest', 'fire', 'cafe'].forEach(id => {
+                    const audio = document.getElementById(`audio-${id}`);
+                    if (audio) audio.pause();
+                });
             }
 
             updateDisplay() {
@@ -1106,14 +1419,18 @@
             updateTitle() {
                 const m = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
                 const s = (this.timeLeft % 60).toString().padStart(2, '0');
-                const mode = this.currentMode === 'focus' ? 'Focus' : 'Break';
+                const mode = this.currentMode === 'focus' ? 'Focus' : (this.currentMode === 'custom' ? 'Özel' : 'Break');
                 document.title = `${m}:${s} // ${mode} - Zenith`;
             }
 
             updateProgress() {
+                if (this.totalTime <= 0) {
+                    this.progressRing.style.strokeDashoffset = 0;
+                    return;
+                }
                 const progress = (this.totalTime - this.timeLeft) / this.totalTime;
-                const offset = (2 * Math.PI * 130) * progress;
-                this.progressRing.style.strokeDashoffset = offset;
+                const circumference = 2 * Math.PI * 130;
+                this.progressRing.style.strokeDashoffset = circumference * progress;
             }
 
             finish() {
@@ -1121,27 +1438,25 @@
                 this.isRunning = false;
                 
                 this.playCompleteSound();
+                this.sendNotification();
                 
-                if (this.currentMode === 'focus') {
+                if (this.currentMode === 'focus' || this.currentMode === 'custom') {
                     this.sessions++;
-                    this.saveSessions();
+                    this.addSession(this.currentMode, this.modes[this.currentMode].time);
+                    this.saveSettings();
                     this.updateStreak();
                 }
                 
-                this.sendNotification();
-                
                 this.dom.timer.classList.add('active-timer');
-                setTimeout(() => {
-                    this.dom.timer.classList.remove('active-timer');
-                }, 2000);
+                setTimeout(() => this.dom.timer.classList.remove('active-timer'), 2000);
                 
-                const message = this.currentMode === 'focus' 
+                this.pauseMusic();
+                
+                const message = this.currentMode === 'focus' || this.currentMode === 'custom'
                     ? "🎉 Odaklanma seansı bitti! Harikasın!" 
                     : "☕ Mola bitti! Hazır mısın?";
                 
                 this.showFinishModal(message);
-                this.pauseMusic();
-                this.resetTimer();
             }
 
             showFinishModal(message) {
@@ -1152,66 +1467,31 @@
                 modal.className = 'finish-modal';
                 modal.innerHTML = `
                     <style>
-                        .finish-modal {
-                            position: fixed;
-                            inset: 0;
-                            background: rgba(0,0,0,0.8);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            z-index: 100;
-                            animation: fadeIn 0.3s ease;
-                        }
-                        @keyframes fadeIn {
-                            from { opacity: 0; }
-                            to { opacity: 1; }
-                        }
-                        .finish-modal-content {
-                            background: var(--card);
-                            backdrop-filter: blur(40px);
-                            padding: 40px;
-                            border-radius: 30px;
-                            text-align: center;
-                            border: 1px solid var(--border);
-                            max-width: 300px;
-                        }
-                        .finish-modal h2 {
-                            color: var(--accent);
-                            margin-bottom: 15px;
-                            font-weight: 300;
-                        }
-                        .finish-modal p {
-                            color: var(--text-dim);
-                            margin-bottom: 25px;
-                            font-size: 14px;
-                        }
-                        .finish-modal button {
-                            background: var(--accent);
-                            color: white;
-                            border: none;
-                            padding: 12px 30px;
-                            border-radius: 15px;
-                            font-size: 14px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            font-family: inherit;
-                        }
+                        .finish-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 100; animation: fadeIn 0.3s ease; }
+                        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                        .finish-modal-content { background: var(--card); backdrop-filter: blur(40px); padding: 40px; border-radius: 30px; text-align: center; border: 1px solid var(--border); max-width: 300px; }
+                        .finish-modal h2 { color: var(--accent); margin-bottom: 15px; font-weight: 300; }
+                        .finish-modal p { color: var(--text-dim); margin-bottom: 25px; font-size: 14px; }
+                        .finish-modal button { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 15px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
                     </style>
                     <div class="finish-modal-content">
-                        <h2>${this.currentMode === 'focus' ? '🎯' : '☕'}</h2>
+                        <h2>${this.currentMode === 'focus' || this.currentMode === 'custom' ? '🎯' : '☕'}</h2>
                         <p>${message}</p>
                         <p style="margin-top: 10px; color: var(--accent); font-weight: 600;">Toplam Oturum: ${this.sessions}</p>
-                        <button onclick="this.closest('.finish-modal').remove()">Tamam</button>
+                        <button class="finish-modal-btn">Tamam</button>
                     </div>
                 `;
                 document.body.appendChild(modal);
                 
-                const escHandler = (e) => {
-                    if (e.code === 'Escape') {
-                        modal.remove();
-                        document.removeEventListener('keydown', escHandler);
-                    }
+                const closeModalAndReset = () => {
+                    modal.remove();
+                    document.removeEventListener('keydown', escHandler);
+                    this.resetTimer();
                 };
+                
+                modal.querySelector('.finish-modal-btn').addEventListener('click', closeModalAndReset);
+                
+                const escHandler = (e) => { if (e.code === 'Escape') closeModalAndReset(); };
                 document.addEventListener('keydown', escHandler);
             }
 
@@ -1237,13 +1517,8 @@
                     const audio = document.getElementById(`audio-${id}`);
                     if (audio) {
                         audio.load();
-                        audio.addEventListener('canplaythrough', () => {
-                            this.audioLoaded[id] = true;
-                        });
-                        audio.addEventListener('error', (e) => {
-                            console.log(`Audio ${id} yüklenemedi:`, e);
-                            this.audioLoaded[id] = false;
-                        });
+                        audio.addEventListener('canplaythrough', () => { this.audioLoaded[id] = true; });
+                        audio.addEventListener('error', (e) => { console.log(`Audio ${id} yüklenemedi:`, e); this.audioLoaded[id] = false; });
                     }
                 }
             }
@@ -1256,49 +1531,13 @@
                 }
             }
 
-            saveAudioVolumes() {
-                const volumes = {};
-                this.dom.sliders.forEach(s => {
-                    volumes[s.dataset.src] = s.value;
-                });
-                localStorage.setItem('zenith_volumes', JSON.stringify(volumes));
-            }
-
-            loadAudioVolumes() {
-                const saved = localStorage.getItem('zenith_volumes');
-                if (saved) {
-                    const volumes = JSON.parse(saved);
-                    this.dom.sliders.forEach(s => {
-                        if (volumes[s.dataset.src] !== undefined) {
-                            s.value = volumes[s.dataset.src];
-                            const audio = document.getElementById(`audio-${s.dataset.src}`);
-                            if (audio && volumes[s.dataset.src] > 0) {
-                                audio.volume = volumes[s.dataset.src];
-                                audio.play().catch(() => {});
-                            }
-                        }
-                    });
-                }
-            }
-
-            saveSessions() {
-                localStorage.setItem('zenith_sessions', this.sessions.toString());
-            }
-
-            loadSessions() {
-                const saved = localStorage.getItem('zenith_sessions');
-                return saved ? parseInt(saved, 10) : 0;
-            }
-
             updateStreak() {
                 this.dom.streak.innerText = this.sessions;
             }
 
             checkNotificationPermission() {
-                if ('Notification' in window) {
-                    if (Notification.permission === 'default') {
-                        this.dom.notificationPrompt.classList.add('show');
-                    }
+                if ('Notification' in window && Notification.permission === 'default') {
+                    this.dom.notificationPrompt.classList.add('show');
                 }
             }
 
@@ -1307,10 +1546,7 @@
                     Notification.requestPermission().then(permission => {
                         if (permission === 'granted') {
                             this.dom.notificationPrompt.classList.remove('show');
-                            new Notification('Zenith Focus', {
-                                body: 'Bildirimler etkinleştirildi!',
-                                icon: '🔔'
-                            });
+                            new Notification('Zenith Focus', { body: 'Bildirimler etkinleştirildi!', icon: '🔔' });
                         }
                     });
                 }
@@ -1318,16 +1554,12 @@
 
             sendNotification() {
                 if ('Notification' in window && Notification.permission === 'granted') {
-                    const title = this.currentMode === 'focus' ? '🎯 Odaklanma Bitti!' : '☕ Mola Bitti!';
-                    const body = this.currentMode === 'focus'
+                    const title = this.currentMode === 'focus' || this.currentMode === 'custom' ? '🎯 Odaklanma Bitti!' : '☕ Mola Bitti!';
+                    const body = this.currentMode === 'focus' || this.currentMode === 'custom'
                         ? 'Harika bir iş çıkardın! Bir mola vermeye ne dersin?'
                         : 'Yeniden enerjik hissediyor olmalısın!';
                     
-                    new Notification(title, {
-                        body: body,
-                        icon: '⚡',
-                        tag: 'zenith-timer'
-                    });
+                    new Notification(title, { body: body, icon: '⚡', tag: 'zenith-timer' });
                 }
             }
         }
@@ -1335,8 +1567,7 @@
         window.onload = () => new ZenithApp();
         
         window.onbeforeunload = () => {
-            const audios = document.querySelectorAll('audio');
-            audios.forEach(a => a.pause());
+            document.querySelectorAll('audio').forEach(a => a.pause());
         };
     </script>
 </body>
