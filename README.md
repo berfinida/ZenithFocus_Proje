@@ -1,62 +1,97 @@
-<div align="center">
+# ⚡ Zenith Focus — Deep Work Suite
 
-# 🚀 Zenith Focus
+Zenith Focus is a modern **Deep Work & Pomodoro web application** designed to help users stay focused, reduce distractions, and build sustainable productivity habits.
 
-### Pomodoro & Focus Landing Page
-
-🔗 **Live Demo:**
-https://berfinida.github.io/ZenithFocus_Proje/
-
-</div>
-
----
-
-## 📌 Project Purpose
-
-Zenith Focus is a productivity-focused web project designed around the **Pomodoro technique** and deep focus mindset.
-
-The aim of this project is to create a modern and minimal website that helps users understand and experience focused work sessions through a clean and distraction-free interface.
-
----
-
-## 🎯 Main Idea
-
-This project was created to:
-
-* Present a focus & productivity concept
-* Build a clean Pomodoro-inspired landing page
-* Practice modern frontend layout design
-* Improve UI/UX structure and visual hierarchy
-
----
-
-## 🛠️ Technologies Used
-
-* HTML5
-* CSS3
-* JavaScript
+It combines a clean minimal interface with powerful focus tools like ambient sound mixing, session tracking, and PWA support.
 
 ---
 
 ## ✨ Features
 
-* Focus-oriented design
-* Minimal & distraction-free layout
-* Modern landing page structure
-* Responsive design
-* Clean typography and spacing
+### ⏱️ Smart Pomodoro Timer
+- Focus / Short Break / Long Break modes  
+- Custom timer (1–180 minutes)  
+- Animated progress ring  
+- Keyboard shortcuts (Space / Escape)  
+- Session completion modal  
 
 ---
 
-## 👩‍💻 Author
+### 🎵 Advanced Audio Experience
+- Built-in ambient sound mixer:
+  - 🌧️ Rain
+  - 🌲 Forest
+  - 🔥 Fire
+  - ☕ Cafe
 
-**Berfin Nida Öztürk**
+- Ready-to-use presets:
+  - Deep Rain
+  - Forest Calm
+  - Cafe Study
 
-* GitHub: https://github.com/berfinida
-* LinkedIn: https://www.linkedin.com/in/berfin-nida-%C3%B6zt%C3%BCrk-6a12131b7/
+- External music integrations:
+  - YouTube focus stream  
+  - Spotify focus playlist  
+  - Apple Music focus playlist  
 
 ---
 
-## 🚀 Note
+### 📊 Productivity Analytics
+- Today’s focus minutes  
+- Total sessions completed  
+- Weekly statistics  
+- Last 7 days activity chart  
 
-This project is part of my frontend development journey and focuses on creating modern, user-centered interfaces inspired by real productivity concepts.
+---
+
+### 🎨 Adaptive UI / UX
+- Dark & Light themes  
+- Glassmorphism design  
+- Smooth animations  
+- Fully responsive layouts:
+  - Mobile
+  - Tablet
+  - Desktop
+
+---
+
+### 📱 Progressive Web App (PWA)
+- Installable like a native app  
+- Offline caching via Service Worker  
+- Fast loading experience  
+- App-like performance  
+
+---
+
+## ⚙️ Tech Stack
+- HTML5  
+- CSS3 (advanced responsive design)  
+- Vanilla JavaScript (OOP architecture)  
+- Web Audio API  
+- LocalStorage persistence  
+- Service Workers (offline support)  
+
+---
+
+## 🧠 Architecture
+
+Zenith Focus follows a modular, component-based logic using pure JavaScript.
+
+Main modules:
+- Timer Engine  
+- Audio Mixer System  
+- Session Tracking  
+- Statistics Engine  
+- Theme Manager  
+- PWA Handler  
+
+---
+
+## 📂 Project Structure
+
+```bash
+ZenithFocus/
+│
+├── index.html      # Main application
+├── manifest.json   # PWA configuration
+├── sw.js           # Service Worker (offline cache)
