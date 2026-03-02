@@ -1,89 +1,92 @@
 # ⚡ Zenith Focus — Deep Work Suite
 
+🔗 **Live Demo:**  
+https://berfinida.github.io/ZenithFocus_Proje/
+
 Zenith Focus is a modern **Deep Work & Pomodoro web application** designed to help users stay focused, reduce distractions, and build sustainable productivity habits.
 
-It combines a clean minimal interface with powerful focus tools like ambient sound mixing, session tracking, and PWA support.
+It combines a minimal aesthetic with powerful productivity features such as ambient sound mixing, session analytics, theme switching, and Progressive Web App (PWA) support.
+
+---
+
+## 🌐 Live Preview
+
+➡️ Try it here:  
+https://berfinida.github.io/ZenithFocus_Proje/
 
 ---
 
 ## ✨ Features
 
 ### ⏱️ Smart Pomodoro Timer
-- Focus / Short Break / Long Break modes  
-- Custom timer (1–180 minutes)  
-- Animated progress ring  
-- Keyboard shortcuts (Space / Escape)  
-- Session completion modal  
-
----
+- Focus / Short Break / Long Break modes
+- Custom timer (1–180 minutes)
+- Animated circular progress ring
+- Keyboard shortcuts (Space / Escape)
+- Session completion modal
 
 ### 🎵 Advanced Audio Experience
-- Built-in ambient sound mixer:
-  - 🌧️ Rain
-  - 🌲 Forest
-  - 🔥 Fire
-  - ☕ Cafe
 
-- Ready-to-use presets:
-  - Deep Rain
-  - Forest Calm
-  - Cafe Study
+Built-in ambient mixer:
+- 🌧️ Rain
+- 🌲 Forest
+- 🔥 Fire
+- ☕ Cafe
 
-- External music integrations:
-  - YouTube focus stream  
-  - Spotify focus playlist  
-  - Apple Music focus playlist  
+Preset sound profiles:
+- Deep Rain
+- Forest Calm
+- Cafe Study
 
----
+External integrations:
+- YouTube focus stream
+- Spotify focus playlist
+- Apple Music focus playlist
 
 ### 📊 Productivity Analytics
-- Today’s focus minutes  
-- Total sessions completed  
-- Weekly statistics  
-- Last 7 days activity chart  
-
----
+- Today’s focus minutes
+- Total sessions completed
+- Weekly focus summary
+- Last 7 days activity chart
 
 ### 🎨 Adaptive UI / UX
-- Dark & Light themes  
-- Glassmorphism design  
-- Smooth animations  
-- Fully responsive layouts:
+- Dark & Light themes
+- Glassmorphism-style interface
+- Smooth transitions & animations
+- Fully responsive layout:
   - Mobile
   - Tablet
   - Desktop
 
----
-
 ### 📱 Progressive Web App (PWA)
-- Installable like a native app  
-- Offline caching via Service Worker  
-- Fast loading experience  
-- App-like performance  
+- Installable like a native application
+- Offline support via Service Worker
+- Fast loading experience
+- App-like behavior
 
 ---
 
 ## ⚙️ Tech Stack
-- HTML5  
-- CSS3 (advanced responsive design)  
-- Vanilla JavaScript (OOP architecture)  
-- Web Audio API  
-- LocalStorage persistence  
-- Service Workers (offline support)  
+- HTML5
+- CSS3 (Advanced Responsive Design)
+- Vanilla JavaScript (OOP Architecture)
+- Web Audio API
+- LocalStorage Persistence
+- Service Workers
 
 ---
 
 ## 🧠 Architecture
 
-Zenith Focus follows a modular, component-based logic using pure JavaScript.
+Zenith Focus follows a modular architecture built with pure JavaScript.
 
-Main modules:
-- Timer Engine  
-- Audio Mixer System  
-- Session Tracking  
-- Statistics Engine  
-- Theme Manager  
-- PWA Handler  
+Core modules:
+- Timer Engine
+- Audio Mixer System
+- Session Tracker
+- Statistics Engine
+- Theme Manager
+- PWA Handler
 
 ---
 
@@ -92,6 +95,6 @@ Main modules:
 ```bash
 ZenithFocus/
 │
-├── index.html      # Main application
-├── manifest.json   # PWA configuration
-├── sw.js           # Service Worker (offline cache)
+├── index.html
+├── manifest.json
+├── sw.js
