@@ -1,16 +1,18 @@
 // Zenith Focus Service Worker
-const CACHE_NAME = 'zenith-focus-v1';
+const CACHE_NAME = 'zenith-focus-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/assets/rain.mp3',
+  '/assets/forest.mp3',
+  '/assets/fire.mp3',
+  '/assets/cafe.mp3',
+  '/assets/complete.mp3',
   'https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;600&family=JetBrains+Mono:wght@200&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://assets.mixkit.co/sfx/preview/mixkit-light-rain-loop-2393.mp3',
-  'https://assets.mixkit.co/sfx/preview/mixkit-forest-birds-ambience-1210.mp3',
-  'https://assets.mixkit.co/sfx/preview/mixkit-campfire-crackling-1288.mp3',
-  'https://assets.mixkit.co/sfx/preview/mixkit-restaurant-crowd-talking-444.mp3',
-  'https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
 // Install event - cache assets
