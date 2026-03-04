@@ -6,7 +6,7 @@
 
 ### Deep Work • Minimal Design • Maximum Productivity
 
-A modern **focus and productivity web application** designed to help users enter deep work sessions with a clean and distraction-free environment.
+HTML, CSS and JavaScript ile geliştirilmiş minimalist bir **deep work / focus uygulaması**.
 
 🌐 **Live Demo**
 https://berfinida.github.io/ZenithFocus_Proje/
@@ -17,15 +17,21 @@ https://berfinida.github.io/ZenithFocus_Proje/
 
 # ✨ Overview
 
-Zenith Focus is a minimalist **deep work productivity application** inspired by the Pomodoro technique.
+**Zenith Focus**, Pomodoro tekniğinden ilham alan minimalist bir odaklanma uygulamasıdır.
 
-The goal of the project is simple:
+Uygulamanın amacı:
 
-• help users focus on meaningful work
-• eliminate distractions
-• create a calm digital workspace
+• dikkat dağıtıcıları azaltmak
+• uzun süreli odaklanmayı kolaylaştırmak
+• sade bir çalışma ortamı sunmak
 
-The application combines a **focus timer**, **ambient sound environments**, and a **minimal UI design** to support long and productive work sessions.
+Uygulama şu üç temel bileşeni birleştirir:
+
+* Focus Timer
+* Ambient Sound Environment
+* Minimal UI Design
+
+Bu sayede kullanıcılar daha verimli ve sakin bir çalışma ortamı oluşturabilir.
 
 ---
 
@@ -33,11 +39,11 @@ The application combines a **focus timer**, **ambient sound environments**, and 
 
 ⏱ **Focus Timer**
 
-Pomodoro-style timer designed for structured deep work sessions.
+Pomodoro tarzı odaklanma zamanlayıcısı.
 
 🎧 **Ambient Sound Environment**
 
-Multiple background sound environments to improve concentration:
+Odaklanmayı artırmak için farklı ortam sesleri:
 
 * 🌧 Rain
 * ☕ Cafe
@@ -46,94 +52,100 @@ Multiple background sound environments to improve concentration:
 
 🔔 **Session Completion Sound**
 
-Audio notification when a focus session ends.
+Focus süresi bittiğinde sesli bildirim.
 
 🧘 **Minimal Distraction-Free Interface**
 
-Clean UI designed to reduce distractions and improve mental clarity.
+Dikkat dağıtmayan sade bir kullanıcı arayüzü.
 
 📱 **Responsive Design**
 
-Works on desktop, tablet and mobile devices.
+Desktop, tablet ve mobil cihazlarda çalışır.
 
 ⚡ **Progressive Web App (PWA)**
 
-The application can be installed like a native mobile app.
+Uygulama mobil uygulama gibi cihazlara yüklenebilir.
 
 ---
 
 # 🎵 Ambient Sounds
 
-Zenith Focus includes multiple sound environments that can be used during focus sessions.
+Zenith Focus odaklanmayı desteklemek için farklı ortam sesleri içerir.
 
-| Sound  | Description                               |
-| ------ | ----------------------------------------- |
-| Rain   | Calm rain ambience for deep concentration |
-| Cafe   | Coffee shop background atmosphere         |
-| Forest | Natural forest ambience                   |
-| Fire   | Fireplace crackling sound                 |
+| Sound  | Description            |
+| ------ | ---------------------- |
+| Rain   | Calm rain ambience     |
+| Cafe   | Coffee shop background |
+| Forest | Natural forest sounds  |
+| Fire   | Fireplace ambience     |
 
-These environments help simulate real-world focus spaces.
+Bu sesler gerçek çalışma ortamlarını simüle ederek odaklanmayı artırır.
 
 ---
 
 # 🛠 Tech Stack
 
-| Technology       | Purpose                  |
-| ---------------- | ------------------------ |
-| HTML5            | Application structure    |
-| CSS3             | UI design and layout     |
-| JavaScript       | Application logic        |
-| Service Worker   | Offline capability       |
-| Web App Manifest | PWA installation support |
+| Technology       | Purpose               |
+| ---------------- | --------------------- |
+| HTML5            | Application structure |
+| CSS3             | UI design             |
+| JavaScript       | Application logic     |
+| Service Worker   | Offline support       |
+| Web App Manifest | PWA installation      |
 
-The project intentionally avoids heavy frameworks to keep the application **fast and lightweight**.
+Framework kullanılmadan geliştirilmiştir.
+
+Bu sayede uygulama:
+
+• hızlı
+• hafif
+• performanslı
+
+çalışır.
 
 ---
 
 # 📂 Project Structure
 
-```
 ZenithFocus_Proje
-│
-├── assets
-│   ├── cafe.mp3
-│   ├── complete.mp3
-│   ├── fire.mp3
-│   ├── forest.mp3
-│   └── rain.mp3
-│
-├── icon-192.png
-├── icon-512.png
-├── index.html
-├── manifest.json
-├── sw.js
-└── README.md
-```
+
+assets/
+  ├── cafe.mp3
+  ├── complete.mp3
+  ├── fire.mp3
+  ├── forest.mp3
+  └── rain.mp3
+
+icon-192.png
+icon-512.png
+index.html
+manifest.json
+sw.js
+README.md
 
 ---
 
 # 📱 Progressive Web App
 
-Zenith Focus supports **PWA installation**, allowing users to install the app directly on their device.
+Zenith Focus **PWA desteği** içerir.
 
-This enables:
+Bu sayede kullanıcılar:
 
-• offline usage
-• faster loading
-• native-app-like experience
+• uygulamayı telefonlarına yükleyebilir
+• offline kullanabilir
+• native uygulama deneyimi yaşayabilir
 
 ---
 
 # 🔮 Future Improvements
 
-Planned features for future versions:
+Planlanan geliştirmeler:
 
 • focus analytics dashboard
-• daily and weekly productivity statistics
-• focus streak tracking
+• weekly focus statistics
+• focus streak system
 • task management system
-• additional ambient sound environments
+• additional ambient sounds
 • custom UI themes
 
 ---
