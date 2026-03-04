@@ -1,4 +1,5 @@
 <div align="center">
+<img width="1907" height="866" alt="image" src="https://github.com/user-attachments/assets/964ce403-69ee-4d4a-a619-66770246704e" />
 
 # ⚡ Zenith Focus
 
